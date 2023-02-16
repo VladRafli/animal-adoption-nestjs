@@ -1,3 +1,64 @@
+# Animal Adoption API (NestJS)
+
+This is API Server source code for Animal Adoption Application. Ported code from Animal Adoption API using ExpressJS
+
+Part of Thesis Project by:
+
+- 2301943402 - Rafli Athala Jaskandi (API Developer)
+- 23019..... - Aldiyan Moes T. (Mobile Developer)
+- 23018..... - Julio Rivaldo (Supporting Developer)
+
+## Links
+
+-   [Links](#links)
+-   [Development](#development)
+-   [Deployment](#deployment)
+-   [Code Standards](#code-standards)
+-   [Libraries](#libraries)
+-   [License](#license)
+
+## Development
+
+Soon to be available via docker-compose.
+
+You can choose between using WSL or Virtual Machine for Windows User.
+
+For now, deploy these as Docker Container:
+
+- Portainer (https://hub.docker.com/r/portainer/portainer-ce) - Manage Docker Containers (Use community edition) - Copy & paste "docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest" to terminal
+- Mariadb (https://hub.docker.com/_/mariadb) - Name it like "mariadb-local" - Open port 3306:3306 - Env: MARIADB_USER, MARIADB_PASSWORD, MARIADB_ROOT_PASSWORD
+- PHPMyAdmin (https://hub.docker.com/_/phpmyadmin) - Copy & paste "docker run --name phpmyadmin -d --link <mariadb_container_name>:db -p 8080:80 phpmyadmin" to terminal
+- Redis-Stack (https://hub.docker.com/r/redis/redis-stack) - Copy & paste "docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest" to terminal
+Access database using its IP (If VM, check the IP Address).
+
+Open port 8080 for PHPMyAdmin
+
+Open port 8001 for Redis Insight
+
+## Deployment
+
+Planned deployment on AWS ECS with Domain.
+
+## Code Standards
+
+- Git Commit: https://commitizen-tools.github.io/commitizen/
+- JSON Response: https://github.com/omniti-labs/jsend
+- API Docs: https://swagger.io/resources/open-api/
+
+## Libraries
+
+to be written soon...
+
+## License
+
+This API is [GNU AGPLv3 licensed](LICENSE)
+
+## Framework
+
+<p align="center">This project is made possible by:</p>
+
+<p align="center" style="font-size: 24px; font-weight: bold;">Nest JS</p>
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
@@ -70,4 +131,4 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
