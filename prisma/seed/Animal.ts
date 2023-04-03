@@ -1,29 +1,51 @@
-import _ from 'lodash';
-import { Animal, PrismaClient } from '@prisma/client';
+import { AnimalGender, Prisma, PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import * as uuid from 'uuid';
 
 const prisma = new PrismaClient();
 
-export default async function Animal() {
+export default async function Animal({
+  user,
+  animalType,
+}: {
+  user: {
+    userId: string;
+  };
+  animalType: {
+    catTypeId: string;
+    dogTypeId: string;
+  };
+}) {
   // Cat
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cat: any[] = Array.from({ length: 50 }).map(() => ({
-    userId: 1,
-    name: faker.name.firstName(),
-    breed: faker.animal.cat(),
-    animalTypeId: 1,
-  }));
+  const cat: Prisma.AnimalCreateManyInput[] = Array.from({ length: 50 }).map(
+    () => ({
+      id: uuid.v4(),
+      userId: user.userId,
+      animalTypeId: animalType.catTypeId,
+      name: faker.name.firstName(),
+      age: faker.datatype.number({ min: 0, max: 10 }),
+      gender: AnimalGender[faker.name.sex()],
+      breed: faker.animal.cat(),
+    }),
+  );
 
   // Dog
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const dog: any[] = Array.from({ length: 50 }).map(() => ({
-    userId: 1,
-    name: faker.name.firstName(),
-    breed: faker.animal.dog(),
-    animalTypeId: 2,
-  }));
+  const dog: Prisma.AnimalCreateManyInput[] = Array.from({ length: 50 }).map(
+    () => ({
+      id: uuid.v4(),
+      userId: user.userId,
+      animalTypeId: animalType.dogTypeId,
+      name: faker.name.firstName(),
+      age: faker.datatype.number({ min: 0, max: 10 }),
+      gender: AnimalGender[faker.name.sex()],
+      breed: faker.animal.dog(),
+    }),
+  );
 
-  const data = _.concat(cat, dog);
+  const data = [];
+
+  cat.forEach((val) => data.push(val));
+  dog.forEach((val) => data.push(val));
 
   await prisma.animal.createMany({
     data: data,

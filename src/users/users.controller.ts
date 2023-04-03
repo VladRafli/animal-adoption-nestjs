@@ -4,49 +4,66 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
+  Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UserEntity } from './entities/user.entity';
+import { Prisma } from '@prisma/client';
+import { Roles } from 'src/_decorators/role.decorator';
+import { JwtAuthGuard } from 'src/_guard/jwt-auth.guard';
 import { UsersService } from './users.service';
 
-@Controller('users')
+@Controller({
+  path: 'user',
+  version: '1',
+})
 @ApiTags('Users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @ApiCreatedResponse({ type: UserEntity })
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'adopter', 'shelter')
+  @ApiCreatedResponse()
+  create(@Body() user: Prisma.UserCreateInput) {
+    return {
+      message: 'Successfully created new user.',
+      data: this.usersService.create(user),
+    };
   }
 
   @Get()
-  @ApiOkResponse({ type: UserEntity, isArray: true })
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'adopter', 'shelter')
+  @ApiOkResponse({ isArray: true })
   findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':username')
-  @ApiOkResponse({ type: UserEntity })
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'adopter', 'shelter')
+  @ApiOkResponse()
   findOne(@Param('username') username: string) {
     return this.usersService.findOne(username);
   }
 
-  @Patch(':username')
-  @ApiOkResponse({ type: UserEntity })
+  @Put(':username')
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'adopter', 'shelter')
+  @ApiOkResponse()
   update(
     @Param('username') username: string,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() user: Prisma.UserUpdateInput,
   ) {
-    return this.usersService.update(username, updateUserDto);
+    return this.usersService.update(username, user);
   }
 
   @Delete(':username')
-  @ApiOkResponse({ type: UserEntity })
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'adopter', 'shelter')
+  @ApiOkResponse()
   remove(@Param('username') username: string) {
     return this.usersService.remove(username);
   }

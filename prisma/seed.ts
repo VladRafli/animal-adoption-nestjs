@@ -6,9 +6,9 @@ import User from './seed/User';
 const prisma = new PrismaClient();
 
 async function main() {
-  User();
-  AnimalType();
-  Animal();
+  const user = await User();
+  const animalType = await AnimalType();
+  await Animal({ user, animalType });
 }
 main()
   .then(async () => {

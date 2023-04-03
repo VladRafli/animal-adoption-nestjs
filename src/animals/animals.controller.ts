@@ -3,21 +3,23 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { AnimalsService } from './animals.service';
-import { CreateAnimalDto } from './dto/create-animal.dto';
-import { UpdateAnimalDto } from './dto/update-animal.dto';
 
-@Controller('animals')
+@Controller({
+  path: 'animal',
+  version: '1',
+})
 export class AnimalsController {
   constructor(private readonly animalsService: AnimalsService) {}
 
   @Post()
-  create(@Body() createAnimalDto: CreateAnimalDto) {
-    return this.animalsService.create(createAnimalDto);
+  create(@Body() animal: Prisma.AnimalCreateInput) {
+    return this.animalsService.create(animal);
   }
 
   @Get()
@@ -30,9 +32,9 @@ export class AnimalsController {
     return this.animalsService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAnimalDto: UpdateAnimalDto) {
-    return this.animalsService.update(+id, updateAnimalDto);
+  @Put(':id')
+  update(@Param('id') id: string, @Body() animal: Prisma.AnimalUpdateInput) {
+    return this.animalsService.update(+id, animal);
   }
 
   @Delete(':id')
