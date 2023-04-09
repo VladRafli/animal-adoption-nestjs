@@ -1,4 +1,4 @@
-import { AnimalType } from '@/_enum/animalType.enum';
+import { AnimalType } from '@/_enum/AnimalType.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { AnimalGender } from '@prisma/client';
 import {
