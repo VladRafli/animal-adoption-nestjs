@@ -1,16 +1,49 @@
-import { AnimalGender, Prisma } from '@prisma/client';
+import { AnimalType } from '@/_enum/animalType.enum';
+import { ApiProperty } from '@nestjs/swagger';
+import { AnimalGender } from '@prisma/client';
+import {
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { CreateAnimalPhotoDto } from './create-animalPhoto.dto';
 
-export class CreateAnimalDto implements Prisma.AnimalCreateInput {
-  id: string;
+export class CreateAnimalDto {
+  @IsEnum(AnimalType)
+  @IsNotEmpty()
+  @ApiProperty()
+  type: AnimalType;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
   name: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty()
   age: number;
+
+  @IsEnum(AnimalGender)
+  @IsNotEmpty()
+  @ApiProperty()
   gender: AnimalGender;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
   breed: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty()
   description?: string;
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
-  deletedAt?: string | Date;
-  user: Prisma.UserCreateNestedOneWithoutAnimalInput;
-  animalType: Prisma.AnimalTypeCreateNestedOneWithoutAnimalInput;
-  AnimalPhoto?: Prisma.AnimalPhotoCreateNestedManyWithoutAnimalInput;
+
+  @IsOptional()
+  @IsArray()
+  @ApiProperty()
+  animalPhoto?: CreateAnimalPhotoDto[];
 }

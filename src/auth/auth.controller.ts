@@ -42,6 +42,7 @@ export class AuthController {
       signed: true,
       sameSite: true,
     });
+
     res.cookie('refresh_token', loginResult.refreshToken, {
       path: '/auth/refresh',
       httpOnly: true,
@@ -49,6 +50,7 @@ export class AuthController {
       signed: true,
       sameSite: true,
     });
+
     return {
       message: 'Successfully logged in.',
       data: loginResult,

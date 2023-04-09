@@ -11,13 +11,13 @@ export default async function AnimalType() {
   await prisma.animalType.create({
     data: {
       id: catTypeId,
-      name: 'Cat',
+      name: 'cat',
     },
   });
   await prisma.animalType.create({
     data: {
       id: dogTypeId,
-      name: 'Dog',
+      name: 'dog',
     },
   });
 

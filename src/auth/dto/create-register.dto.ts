@@ -29,11 +29,11 @@ export class CreateRegisterDto {
   @IsNotEmpty()
   name: string;
 
-  @IsNumberString()
   @IsOptional()
+  @IsNumberString()
   number?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   address?: string;
 }

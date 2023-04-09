@@ -1,13 +1,14 @@
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as compression from 'compression';
-import * as cookieParser from 'cookie-parser';
-import { AppModule } from './app.module';
-import cookieParserConstants from './_constants/cookieParser.constants';
+import { bodyParser, compression, cookieParser } from '@/_helper';
+import { AppModule } from '@/app.module';
+import cookieParserConstants from '@/_constants/cookieParser.constants';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn', 'log', 'verbose', 'debug'],
+  });
 
   const config = new DocumentBuilder()
     .setTitle('Animal Adoption')
@@ -25,6 +26,12 @@ async function bootstrap() {
   });
 
   app.enableCors();
+
+  app.use(
+    bodyParser.json({
+      limit: '50mb',
+    }),
+  );
 
   app.use(compression());
 

@@ -21,7 +21,7 @@ Part of Thesis Project by:
 
 Soon to be available via docker-compose.
 
-You can choose between using WSL or Virtual Machine for Windows User.
+You can choose between using WSL or Virtual Machine for Windows User. 
 
 For now, deploy these as Docker Container:
 

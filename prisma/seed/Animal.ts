@@ -17,7 +17,7 @@ export default async function Animal({
   };
 }) {
   // Cat
-  const cat: Prisma.AnimalCreateManyInput[] = Array.from({ length: 50 }).map(
+  const cat: Prisma.AnimalCreateManyInput[] = Array.from({ length: 5 }).map(
     () => ({
       id: uuid.v4(),
       userId: user.userId,
@@ -30,7 +30,7 @@ export default async function Animal({
   );
 
   // Dog
-  const dog: Prisma.AnimalCreateManyInput[] = Array.from({ length: 50 }).map(
+  const dog: Prisma.AnimalCreateManyInput[] = Array.from({ length: 5 }).map(
     () => ({
       id: uuid.v4(),
       userId: user.userId,

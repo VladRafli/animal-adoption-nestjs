@@ -78,6 +78,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
+      role: user.role,
     };
   }
 
