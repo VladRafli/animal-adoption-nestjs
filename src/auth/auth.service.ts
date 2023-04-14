@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import jwtConstants from '@/_constants/jwt.constants';
+import { PrismaService } from '@/_provider/prisma/prisma.service';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as Bcrypt from 'bcrypt';
 import * as dayjs from 'dayjs';
 import * as uuid from 'uuid';
-import jwtConstants from '@/_constants/jwt.constants';
-import { PrismaService } from '@/_provider/prisma/prisma.service';
+import { ReadLoginDto } from '../_dto/read-login.dto';
 import { CreateRegisterDto } from './dto/create-register.dto';
-import { ReadLoginDto } from './dto/read-login.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,14 +15,16 @@ export class AuthService {
     private prismaService: PrismaService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser({ email, password }: ReadLoginDto): Promise<any> {
     const user = await this.prismaService.user.findFirst({
       where: {
         email: email,
       },
     });
 
-    if (user || Bcrypt.compareSync(password, user.password)) {
+    if (!user) return null;
+
+    if (Bcrypt.compareSync(password, user.password)) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
       return result;
@@ -39,7 +41,7 @@ export class AuthService {
     });
 
     if (!user || !Bcrypt.compareSync(password, user.password)) {
-      return null;
+      throw new ForbiddenException('Invalid credentials.');
     }
 
     const payload = {
@@ -109,7 +111,7 @@ export class AuthService {
       },
     });
 
-    if (!user) return null;
+    if (!user) throw new ForbiddenException('Token is invalid.');
 
     const storedRefreshToken = await this.prismaService.refreshToken.findUnique(
       {
@@ -119,13 +121,11 @@ export class AuthService {
       },
     );
 
-    const test = await Bcrypt.compare(refreshToken, storedRefreshToken.token);
-
     if (
       !storedRefreshToken ||
       !(await Bcrypt.compare(refreshToken, storedRefreshToken.token))
     )
-      return null;
+      throw new ForbiddenException('Token is invalid.');
 
     const payload = {
       sub: user.id,

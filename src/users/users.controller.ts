@@ -24,7 +24,7 @@ export class UsersController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @Roles('admin', 'adopter', 'shelter')
+  @Roles('admin')
   @ApiCreatedResponse()
   create(@Body() user: Prisma.UserCreateInput) {
     return {
@@ -35,7 +35,7 @@ export class UsersController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  @Roles('admin', 'adopter', 'shelter')
+  @Roles('admin')
   @ApiOkResponse({ isArray: true })
   findAll() {
     return this.usersService.findAll();

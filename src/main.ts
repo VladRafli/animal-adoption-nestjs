@@ -1,14 +1,19 @@
+import { AppModule } from '@/app.module';
+import cookieParserConstants from '@/_constants/cookieParser.constants';
+import {
+  bodyParser,
+  compression,
+  cookieParser,
+  dayjs,
+  morgan,
+  rfs,
+} from '@/_helper';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { bodyParser, compression, cookieParser } from '@/_helper';
-import { AppModule } from '@/app.module';
-import cookieParserConstants from '@/_constants/cookieParser.constants';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    logger: ['error', 'warn', 'log', 'verbose', 'debug'],
-  });
+  const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
     .setTitle('Animal Adoption')
@@ -36,6 +41,18 @@ async function bootstrap() {
   app.use(compression());
 
   app.use(cookieParser(cookieParserConstants.CookieSecret));
+
+  app.use(
+    morgan('combined', {
+      stream: rfs.createStream(
+        `./logs/${dayjs().format('DD-MM-YYYY')}-access.log`,
+        {
+          interval: '1d',
+          compress: 'gzip',
+        },
+      ),
+    }),
+  );
 
   app.useGlobalPipes(new ValidationPipe());
 

@@ -1,12 +1,12 @@
 import { AuthService } from '@/auth/auth.service';
-import { JwtAuthGuard, LocalAuthGuard } from '@/_guard';
-import { JwtRefreshGuard } from '@/_guard/jwt-refresh.guard';
+import { ReadLoginDto } from '@/_dto';
+import { JwtAuthGuard, LocalAuthGuard, JwtRefreshGuard } from '@/_guard';
 import {
   BadRequestException,
   Body,
   Controller,
-  ForbiddenException,
   HttpCode,
+  HttpException,
   HttpStatus,
   Post,
   Req,
@@ -14,9 +14,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { CreateRefreshTokenDto } from './dto/create-refreshToken.dto';
 import { CreateRegisterDto } from './dto/create-register.dto';
-import { ReadLoginDto } from './dto/read-login.dto';
 
 @Controller({
   path: 'auth',
@@ -34,8 +32,6 @@ export class AuthController {
   ) {
     const loginResult = await this.authService.login(readLoginDto);
 
-    if (loginResult === null) throw new ForbiddenException();
-
     res.cookie('access_token', loginResult.accessToken, {
       httpOnly: true,
       secure: true,
@@ -52,12 +48,14 @@ export class AuthController {
     });
 
     return {
+      statusCode: HttpStatus.OK,
       message: 'Successfully logged in.',
       data: loginResult,
     };
   }
 
   @Post('/register')
+  @HttpCode(HttpStatus.CREATED)
   async register(@Body() createRegisterDto: CreateRegisterDto) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result } = await this.authService.register(
@@ -67,6 +65,7 @@ export class AuthController {
     if (result == null) throw new BadRequestException();
 
     return {
+      statusCode: HttpStatus.CREATED,
       message: 'Successfully registered new user.',
       data: result,
     };
@@ -74,26 +73,24 @@ export class AuthController {
   // TODO: Forgot Password
   @Post('/forgot-password')
   @UseGuards(JwtAuthGuard)
-  async forgotPassword(@Req() req: Request) {
-    return 'Not Implemented';
+  @HttpCode(HttpStatus.NOT_IMPLEMENTED)
+  async forgotPassword() {
+    throw new HttpException('Not implemented', HttpStatus.NOT_IMPLEMENTED);
   }
 
   @Post('/refresh')
   @UseGuards(JwtRefreshGuard)
-  async refreshToken(
-    @Req() req: Request,
-    @Body() createRefreshTokenDto: CreateRefreshTokenDto,
-  ) {
-    const { userId } = createRefreshTokenDto;
+  @HttpCode(HttpStatus.CREATED)
+  async refreshToken(@Req() req) {
+    const userId = req.user.sub;
     const refreshToken = req.headers.authorization.split(' ')[1];
     const newTokens = await this.authService.generateAccessToken(
       userId,
       refreshToken,
     );
 
-    if (newTokens === null) throw new ForbiddenException();
-
     return {
+      statusCode: HttpStatus.CREATED,
       message: 'Successfully generate new token.',
       data: newTokens,
     };
