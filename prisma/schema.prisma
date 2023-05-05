@@ -11,19 +11,20 @@ datasource db {
 }
 
 model User {
-  id             String         @id @unique @db.Char(40)
-  email          String         @unique @db.VarChar(100)
-  password       String         @db.VarChar(255)
-  profilePicture String?        @db.VarChar(255)
-  role           String         @db.VarChar(50)
-  name           String         @db.VarChar(100)
-  number         String?        @db.VarChar(50)
-  address        String?        @db.VarChar(255)
-  createdAt      DateTime       @default(now()) @db.DateTime
-  updatedAt      DateTime       @updatedAt @db.DateTime
-  deletedAt      DateTime?      @db.DateTime
-  animal         Animal[]
-  RefreshToken   RefreshToken?
+  id                  String                @id @unique @db.Char(40)
+  email               String                @unique @db.VarChar(100)
+  password            String                @db.VarChar(255)
+  profilePicture      String?               @db.VarChar(255)
+  role                String                @db.VarChar(50)
+  name                String                @db.VarChar(100)
+  number              String?               @db.VarChar(50)
+  address             String?               @db.VarChar(255)
+  createdAt           DateTime              @default(now()) @db.DateTime
+  updatedAt           DateTime              @updatedAt @db.DateTime
+  deletedAt           DateTime?             @db.DateTime
+  animal              Animal[]
+  RefreshToken        RefreshToken?
+  AdoptionTransaction AdoptionTransaction[]
 }
 
 model RefreshToken {
@@ -47,20 +48,21 @@ model AnimalType {
 }
 
 model Animal {
-  id           String        @id @unique @db.Char(40)
-  userId       String        @db.Char(40)
-  animalTypeId String        @db.Char(40)
-  name         String        @db.VarChar(100)
-  age          Int           @db.UnsignedTinyInt
-  gender       AnimalGender
-  breed        String        @db.VarChar(100)
-  description  String?       @db.VarChar(255)
-  createdAt    DateTime      @default(now()) @db.DateTime
-  updatedAt    DateTime      @updatedAt @db.DateTime
-  deletedAt    DateTime?     @db.DateTime
-  user         User          @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: NoAction)
-  animalType   AnimalType    @relation(fields: [animalTypeId], references: [id], onUpdate: Cascade, onDelete: NoAction)
-  animalPhoto  AnimalPhoto[]
+  id                  String                @id @unique @db.Char(40)
+  userId              String                @db.Char(40)
+  animalTypeId        String                @db.Char(40)
+  name                String                @db.VarChar(100)
+  age                 Int                   @db.UnsignedTinyInt
+  gender              AnimalGender
+  breed               String                @db.VarChar(100)
+  description         String?               @db.VarChar(255)
+  createdAt           DateTime              @default(now()) @db.DateTime
+  updatedAt           DateTime              @updatedAt @db.DateTime
+  deletedAt           DateTime?             @db.DateTime
+  user                User                  @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  animalType          AnimalType            @relation(fields: [animalTypeId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  animalPhoto         AnimalPhoto[]
+  AdoptionTransaction AdoptionTransaction[]
 }
 
 model AnimalPhoto {
@@ -74,6 +76,65 @@ model AnimalPhoto {
   updatedAt DateTime  @updatedAt @db.DateTime
   deletedAt DateTime? @db.DateTime
   animal    Animal    @relation(fields: [animalId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+}
+
+model AdoptionTransaction {
+  id        String    @id @unique @db.Char(40)
+  userId    String    @db.Char(40)
+  animalId  String    @db.Char(40)
+  status    String    @db.VarChar(50)
+  createdAt DateTime  @default(now()) @db.DateTime
+  updatedAt DateTime  @updatedAt @db.DateTime
+  deletedAt DateTime? @db.DateTime
+  user      User      @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  animal    Animal    @relation(fields: [animalId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+}
+
+model ApplicationStatistics {
+  id                   Int                @id @unique @default(autoincrement()) @db.Int
+  userStatisticsId     Int                @db.Int
+  animalStatisticsId   Int                @db.Int
+  adoptionStatisticsId Int                @db.Int
+  createdAt            DateTime           @default(now()) @db.DateTime
+  updatedAt            DateTime           @updatedAt @db.DateTime
+  deletedAt            DateTime?          @db.DateTime
+  userStatistics       UserStatistics     @relation(fields: [userStatisticsId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  animalStatistics     AnimalStatistics   @relation(fields: [animalStatisticsId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  adoptionStatistics   AdoptionStatistics @relation(fields: [adoptionStatisticsId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+}
+
+model UserStatistics {
+  id                    Int                     @id @unique @default(autoincrement()) @db.Int
+  totalUser             Int                     @db.Int
+  totalAdmin            Int                     @db.Int
+  totalAdopter          Int                     @db.Int
+  totalShelter          Int                     @db.Int
+  createdAt             DateTime                @default(now()) @db.DateTime
+  updatedAt             DateTime                @updatedAt @db.DateTime
+  deletedAt             DateTime?               @db.DateTime
+  ApplicationStatistics ApplicationStatistics[]
+}
+
+model AnimalStatistics {
+  id                    Int                     @id @unique @default(autoincrement()) @db.Int
+  totalAnimal           Int                     @db.Int
+  totalCat              Int                     @db.Int
+  totalDog              Int                     @db.Int
+  createdAt             DateTime                @default(now()) @db.DateTime
+  updatedAt             DateTime                @updatedAt @db.DateTime
+  deletedAt             DateTime?               @db.DateTime
+  ApplicationStatistics ApplicationStatistics[]
+}
+
+model AdoptionStatistics {
+  id                    Int                     @id @unique @default(autoincrement()) @db.Int
+  totalAdoption         Int                     @db.Int
+  totalCatAdoption      Int                     @db.Int
+  totalDogAdoption      Int                     @db.Int
+  createdAt             DateTime                @default(now()) @db.DateTime
+  updatedAt             DateTime                @updatedAt @db.DateTime
+  deletedAt             DateTime?               @db.DateTime
+  ApplicationStatistics ApplicationStatistics[]
 }
 
 enum AnimalGender {

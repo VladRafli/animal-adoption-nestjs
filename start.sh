@@ -1,0 +1,1 @@
+pm2 start ./dist/src/main.js --name "Server" && pm2 start ./dist/jobs/index.js --name "Jobs"

@@ -1,19 +1,21 @@
 import { AuthService } from '@/auth/auth.service';
 import { ReadLoginDto } from '@/_dto';
-import { JwtAuthGuard, LocalAuthGuard, JwtRefreshGuard } from '@/_guard';
+import { JwtAuthGuard, JwtRefreshGuard, LocalAuthGuard } from '@/_guard';
 import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpException,
   HttpStatus,
   Post,
   Req,
   Res,
+  Session,
   UseGuards,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { CreateRegisterDto } from './dto/create-register.dto';
 
 @Controller({
@@ -29,23 +31,13 @@ export class AuthController {
   async login(
     @Body() readLoginDto: ReadLoginDto,
     @Res({ passthrough: true }) res: Response,
+    @Session() session: Record<string, any>,
   ) {
     const loginResult = await this.authService.login(readLoginDto);
 
-    res.cookie('access_token', loginResult.accessToken, {
-      httpOnly: true,
-      secure: true,
-      signed: true,
-      sameSite: true,
-    });
-
-    res.cookie('refresh_token', loginResult.refreshToken, {
-      path: '/auth/refresh',
-      httpOnly: true,
-      secure: true,
-      signed: true,
-      sameSite: true,
-    });
+    session.user = loginResult.filteredUser;
+    session.accessToken = loginResult.accessToken;
+    session.refreshToken = loginResult.refreshToken;
 
     return {
       statusCode: HttpStatus.OK,
@@ -62,7 +54,7 @@ export class AuthController {
       createRegisterDto,
     );
 
-    if (result == null) throw new BadRequestException();
+    if (!result) throw new BadRequestException();
 
     return {
       statusCode: HttpStatus.CREATED,
@@ -70,12 +62,53 @@ export class AuthController {
       data: result,
     };
   }
-  // TODO: Forgot Password
+  // TODO: Link for reset password
   @Post('/forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Req() req) {
+    const sendEmail = this.authService.forgotPassword(req.body);
+
+    if (!sendEmail) throw new BadRequestException();
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Successfully send reset password confirmation.',
+      data: sendEmail,
+    };
+  }
+  // TODO: Validate Reset password action
+  @Get('/reset-password')
+  @HttpCode(HttpStatus.OK)
+  async validateResetPassword(@Req() req) {
+    // const validate = this.authService.validateResetPassword(req.query);
+    throw new HttpException('Not implemented yet.', HttpStatus.NOT_IMPLEMENTED);
+  }
+
+  @Post('/logout')
   @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.NOT_IMPLEMENTED)
-  async forgotPassword() {
-    throw new HttpException('Not implemented', HttpStatus.NOT_IMPLEMENTED);
+  @HttpCode(HttpStatus.OK)
+  async logout(
+    @Req() req,
+    @Res({ passthrough: true }) res: Response,
+    @Session() session: Record<string, any>,
+  ) {
+    const token = this.authService.logout(req.user.sub);
+
+    return new Promise((resolve, reject) => {
+      session.destroy((err) => {
+        if (err)
+          reject({
+            statusCode: HttpStatus.BAD_REQUEST,
+            message: 'Failed to logout.',
+            data: err,
+          });
+        resolve({
+          statusCode: HttpStatus.OK,
+          message: 'Successfully logged out.',
+          data: token,
+        });
+      });
+    });
   }
 
   @Post('/refresh')
@@ -83,7 +116,8 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   async refreshToken(@Req() req) {
     const userId = req.user.sub;
-    const refreshToken = req.headers.authorization.split(' ')[1];
+    const refreshToken =
+      req.headers.authorization.split(' ')[1] || req.cookies.refresh_token;
     const newTokens = await this.authService.generateAccessToken(
       userId,
       refreshToken,
@@ -93,6 +127,17 @@ export class AuthController {
       statusCode: HttpStatus.CREATED,
       message: 'Successfully generate new token.',
       data: newTokens,
+    };
+  }
+
+  @Get('/isloggedin')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async isLoggedIn() {
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'User is logged in.',
+      data: null,
     };
   }
 }

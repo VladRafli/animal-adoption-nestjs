@@ -2,8 +2,8 @@ import * as Dotenv from 'dotenv';
 
 Dotenv.config();
 
-const cookieParserConstants = {
+const expressSessionConstants = {
   CookieSecret: process.env.COOKIE_SECRET,
 };
 
-export default cookieParserConstants;
+export default expressSessionConstants;

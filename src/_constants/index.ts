@@ -1,2 +1,2 @@
 export * from './jwt.constants';
-export * from './cookieParser.constants';
+export * from './expressSession.constants';

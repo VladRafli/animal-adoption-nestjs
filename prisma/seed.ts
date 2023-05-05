@@ -6,9 +6,15 @@ import User from './seed/User';
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.$transaction([
+    prisma.animalType.deleteMany(),
+    prisma.animal.deleteMany(),
+    prisma.user.deleteMany(),
+  ]);
+
   const user = await User();
   const animalType = await AnimalType();
-  await Animal({ user, animalType });
+  await Animal({ user: { userId: user.userId[2] }, animalType });
 }
 main()
   .then(async () => {

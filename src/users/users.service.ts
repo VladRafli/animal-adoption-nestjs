@@ -14,14 +14,14 @@ export class UsersService {
     return this.prisma.user.findMany({ where: { deletedAt: null } });
   }
 
-  findOne(email: string) {
+  findOne(id: string) {
     return this.prisma.user.findFirst({
-      where: { email: email, deletedAt: null },
+      where: { id, deletedAt: null },
     });
   }
 
-  async update(username: string, updateUserDto: Prisma.UserUpdateInput) {
-    const user = await this.findOne(username);
+  async update(id: string, updateUserDto: Prisma.UserUpdateInput) {
+    const user = await this.findOne(id);
 
     return this.prisma.user.update({
       where: { id: user.id },
@@ -29,8 +29,8 @@ export class UsersService {
     });
   }
 
-  async remove(username: string) {
-    const user = await this.findOne(username);
+  async remove(id: string) {
+    const user = await this.findOne(id);
 
     return this.prisma.user.delete({ where: { id: user.id } });
   }

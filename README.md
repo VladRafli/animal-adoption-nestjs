@@ -5,8 +5,8 @@ This is API Server source code for Animal Adoption Application. Ported code from
 Part of Thesis Project by:
 
 - 2301943402 - Rafli Athala Jaskandi (API Developer)
-- 23019..... - Aldiyan Moes T. (Mobile Developer)
-- 23018..... - Julio Rivaldo (Supporting Developer)
+- 2301939033 - Aldiyan Moes Tri Setiadi (Mobile Developer)
+- 2301943491 - Julio Rivaldo Gunawan (Supporting Developer)
 
 ## Links
 
@@ -19,7 +19,11 @@ Part of Thesis Project by:
 
 ## Development
 
-Soon to be available via docker-compose.
+To start using PM2, run start.bat for Windows, run start.sh for Linux or MacOS
+
+<strike>Soon to be available via docker-compose.</strike> docker-compose not updated.
+
+For be able to use secure cookies, make sure the certificates are available in ./certs folder. Certificate generated with [minica](https://github.com/jsha/minica)
 
 You can choose between using WSL or Virtual Machine for Windows User. 
 
@@ -37,7 +41,7 @@ Open port 8001 for Redis Insight
 
 ## Deployment
 
-Planned deployment on AWS ECS with Domain.
+Deployed on AWS with EC2 Free tier, and AWS RDBMS Service.
 
 ## Code Standards
 

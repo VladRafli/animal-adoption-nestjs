@@ -1,4 +1,4 @@
-import { UserRole } from '@/_enum/UserRole.enum';
+import { Roles } from '@/_enum/Roles.enum';
 import {
   IsEmail,
   IsNotEmpty,
@@ -21,7 +21,7 @@ export class CreateRegisterDto {
   @IsOptional()
   profilePicture?: string;
 
-  @IsEnum(UserRole)
+  @IsEnum(Roles)
   @IsNotEmpty()
   role: string;
 
