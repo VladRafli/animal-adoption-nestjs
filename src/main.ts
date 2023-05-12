@@ -64,8 +64,8 @@ async function bootstrap() {
   app.use(
     morgan('combined', {
       stream: rfs.createStream(
-        (time, index) => {
-          return `${dayjs(time).format('DD-MM-YYYY')}-${index}-access.log`;
+        () => {
+          return `${dayjs().format('DD-MM-YYYY')}-access.log`;
         },
         {
           interval: '1d',
