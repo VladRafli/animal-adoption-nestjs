@@ -1,2 +1,3 @@
 export * from './AnimalType.enum';
-export * from './Roles.enum';
+export * from './RolesEnum.enum';
+export * from './TransactionStatus.enum';

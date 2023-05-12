@@ -1,22 +1,25 @@
 import { Roles } from '@/_decorators';
-import { RolesGuard } from '@/_guard';
+import { RolesEnum } from '@/_enum';
+import { JwtAuthGuard, RolesGuard, SessionGuard } from '@/_guard';
 import {
   Body,
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
   UseGuards,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { Prisma } from '@prisma/client';
-import { JwtAuthGuard } from 'src/_guard/jwt-auth.guard';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 
 @Controller({
-  path: 'user',
+  path: 'users',
   version: '1',
 })
 @ApiTags('Users')
@@ -24,45 +27,67 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard)
+  @Roles(RolesEnum.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse()
-  create(@Body() user: Prisma.UserCreateInput) {
+  async create(@Body() user: CreateUserDto) {
     return {
+      statusCode: HttpStatus.CREATED,
       message: 'Successfully created new user.',
-      data: this.usersService.create(user),
+      data: await this.usersService.create(user),
     };
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard)
+  @Roles(RolesEnum.ADMIN)
+  @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ isArray: true })
-  findAll() {
-    return this.usersService.findAll();
+  async findAll() {
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Successfully retrieved all users.',
+      data: await this.usersService.findAll(),
+    };
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'adopter', 'shelter')
+  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard)
+  @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER, RolesEnum.SHELTER)
+  @HttpCode(HttpStatus.OK)
   @ApiOkResponse()
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Successfully retrieved user.',
+      data: await this.usersService.findOne(id),
+    };
   }
 
   @Put(':username')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'adopter', 'shelter')
+  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard)
+  @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER, RolesEnum.SHELTER)
+  @HttpCode(HttpStatus.OK)
   @ApiOkResponse()
-  update(@Param('id') id: string, @Body() user: Prisma.UserUpdateInput) {
-    return this.usersService.update(id, user);
+  async update(@Param('id') id: string, @Body() user: UpdateUserDto) {
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Successfully updated user.',
+      data: await this.usersService.update(id, user),
+    };
   }
 
   @Delete(':username')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'adopter', 'shelter')
+  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard)
+  @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER, RolesEnum.SHELTER)
+  @HttpCode(HttpStatus.OK)
   @ApiOkResponse()
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  async remove(@Param('id') id: string) {
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Successfully deleted user.',
+      data: await this.usersService.remove(id),
+    };
   }
 }

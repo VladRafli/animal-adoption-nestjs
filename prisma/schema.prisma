@@ -25,9 +25,21 @@ model User {
   animal              Animal[]
   RefreshToken        RefreshToken?
   AdoptionTransaction AdoptionTransaction[]
+  ResetPasswordToken  ResetPasswordToken[]
 }
 
 model RefreshToken {
+  id        String    @id @db.Char(40)
+  token     String    @db.VarChar(500)
+  revokedAt DateTime? @db.DateTime
+  expiredAt DateTime  @db.DateTime
+  createdAt DateTime  @default(now()) @db.DateTime
+  updatedAt DateTime  @updatedAt @db.DateTime
+  deletedAt DateTime? @db.DateTime
+  user      User      @relation(fields: [id], references: [id], onUpdate: Cascade, onDelete: NoAction)
+}
+
+model ResetPasswordToken {
   id        String    @id @db.Char(40)
   token     String    @db.VarChar(500)
   revokedAt DateTime? @db.DateTime

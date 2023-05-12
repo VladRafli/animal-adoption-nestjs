@@ -311,7 +311,6 @@ export class AnimalsService {
     const deletedAnimal = await this.prismaService.animal.delete({
       where: {
         id,
-        
       },
     });
 

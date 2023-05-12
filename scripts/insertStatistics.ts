@@ -39,9 +39,11 @@ async function main() {
 }
 main()
   .then(async () => {
+    console.log('Successfully inserted statistics.');
     await prisma.$disconnect();
   })
   .catch(async (e) => {
+    console.error('Failed to insert statistics.');
     console.error(e);
     await prisma.$disconnect();
     process.exit(1);

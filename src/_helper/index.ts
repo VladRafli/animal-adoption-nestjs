@@ -4,6 +4,7 @@ import compression from 'compression';
 import dayjs from 'dayjs';
 import expressSession from 'express-session';
 import morgan from 'morgan';
+import ms from 'ms';
 import path from 'path';
 
 export * as bcrypt from 'bcrypt';
@@ -17,5 +18,6 @@ export {
   dayjs,
   expressSession,
   morgan,
+  ms,
   path,
 };

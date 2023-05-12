@@ -1,5 +1,6 @@
 import { AppModule } from '@/app.module';
 import {
+  appRootPath,
   bodyParser,
   compression,
   dayjs,
@@ -15,10 +16,10 @@ import expressSessionConstants from './_constants/expressSession.constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    httpsOptions: {
-      key: fs.readFileSync('./certs/minica-key.pem'),
-      cert: fs.readFileSync('./certs/minica.pem'),
-    },
+    // httpsOptions: {
+    //   key: fs.readFileSync('./certs/minica-key.pem'),
+    //   cert: fs.readFileSync('./certs/minica.pem'),
+    // },
   });
 
   const config = new DocumentBuilder()
@@ -53,7 +54,7 @@ async function bootstrap() {
       secret: expressSessionConstants.CookieSecret,
       cookie: {
         httpOnly: true,
-        secure: true,
+        secure: false,
         signed: true,
         sameSite: true,
       },
@@ -63,10 +64,13 @@ async function bootstrap() {
   app.use(
     morgan('combined', {
       stream: rfs.createStream(
-        `./logs/access/${dayjs().format('DD-MM-YYYY')}-access.log`,
+        (time, index) => {
+          return `${dayjs(time).format('DD-MM-YYYY')}-${index}-access.log`;
+        },
         {
           interval: '1d',
           compress: 'gzip',
+          path: `${appRootPath.path}/logs/access`,
         },
       ),
     }),

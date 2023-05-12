@@ -21,9 +21,13 @@ Part of Thesis Project by:
 
 To start using PM2, run start.bat for Windows, run start.sh for Linux or MacOS
 
-<strike>Soon to be available via docker-compose.</strike> docker-compose not updated.
+Email account used served by [https://www.guerrillamail.com/](https://www.guerrillamail.com/). Make burner email for testing.
+
+Testing messages using [https://ethereal.email/](https://ethereal.email/).
 
 For be able to use secure cookies, make sure the certificates are available in ./certs folder. Certificate generated with [minica](https://github.com/jsha/minica)
+
+<strike>Soon to be available via docker-compose.</strike> docker-compose not updated.
 
 You can choose between using WSL or Virtual Machine for Windows User. 
 

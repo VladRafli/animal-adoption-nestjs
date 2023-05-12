@@ -1,15 +1,15 @@
-import { RolesEnum } from '@/_enum/RolesEnum.enum';
+import { RolesEnum } from '@/_enum';
 import {
+  IsBase64,
   IsEmail,
-  IsNotEmpty,
-  IsString,
   IsEnum,
-  IsNumberString,
+  IsNotEmpty,
   IsOptional,
+  IsString,
   IsStrongPassword,
 } from 'class-validator';
 
-export class CreateRegisterDto {
+export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -24,23 +24,23 @@ export class CreateRegisterDto {
   @IsNotEmpty()
   password: string;
 
-  @IsString()
+  @IsBase64()
   @IsOptional()
-  profilePicture?: string;
+  profilePicture: string;
 
   @IsEnum(RolesEnum)
   @IsNotEmpty()
-  role: string;
+  role: RolesEnum;
 
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @IsOptional()
-  @IsNumberString()
-  number?: string;
-
-  @IsOptional()
   @IsString()
-  address?: string;
+  @IsOptional()
+  number: string;
+
+  @IsString()
+  @IsOptional()
+  address: string;
 }

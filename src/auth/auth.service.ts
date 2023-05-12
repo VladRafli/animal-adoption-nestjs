@@ -2,11 +2,17 @@ import jwtConstants from '@/_constants/jwt.constants';
 import { bcrypt, dayjs, uuid } from '@/_helper';
 import { PrismaService } from '@/_provider/prisma/prisma.service';
 import { MailerService } from '@nestjs-modules/mailer';
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  BadRequestException,
+  Injectable,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { ReadLoginDto } from '../_dto/read-login.dto';
 import { CreateForgotPasswordDto } from './dto/create-forgotPassword.dto';
 import { CreateRegisterDto } from './dto/create-register.dto';
+import { CreateResetPasswordDto } from './dto/create-resetPassword.dto';
+import { ReadLoginDto } from './dto/read-login.dto';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +20,7 @@ export class AuthService {
     private jwtService: JwtService,
     private prismaService: PrismaService,
     private mailerService: MailerService,
+    private configService: ConfigService,
   ) {}
 
   async validateUser({ email, password }: ReadLoginDto): Promise<any> {
@@ -75,11 +82,11 @@ export class AuthService {
     await this.prismaService.refreshToken.upsert({
       create: {
         id: user.id,
-        token: bcrypt.hashSync(refreshToken, bcrypt.genSaltSync()),
+        token: refreshToken,
         expiredAt: dayjs().add(7, 'day').format(),
       },
       update: {
-        token: bcrypt.hashSync(refreshToken, bcrypt.genSaltSync()),
+        token: refreshToken,
         expiredAt: dayjs().add(7, 'day').format(),
       },
       where: {
@@ -101,9 +108,7 @@ export class AuthService {
       },
     });
 
-    if (existingUser) {
-      return null;
-    }
+    if (existingUser) throw new BadRequestException('User already exists.');
 
     user.password = await bcrypt.hash(user.password, bcrypt.genSaltSync());
     return await this.prismaService.user.create({
@@ -115,23 +120,90 @@ export class AuthService {
   }
 
   async forgotPassword({ email }: CreateForgotPasswordDto) {
-    const user = this.prismaService.user.findUnique({
+    const user = await this.prismaService.user.findFirst({
       where: {
         email,
       },
     });
 
-    if (!user) return null;
+    if (!user) throw new BadRequestException('User not found.');
+
+    const resetPasswordToken =
+      await this.prismaService.resetPasswordToken.create({
+        data: {
+          id: user.id,
+          token: uuid.v4(),
+          expiredAt: dayjs().add(1, 'day').format(),
+        },
+      });
 
     const sendEmail = await this.mailerService.sendMail({
-      to: 'rafli.jaskandi@gmail.com', // list of receivers
-      from: 'no-reply@adoptme.my.id', // sender address
-      subject: 'Testing Nest MailerModule ✔', // Subject line
-      text: 'welcome', // plaintext body
-      html: '<b>welcome</b>', // HTML body content
+      to: user.email,
+      from: 'no-reply-Adoptme <rafli.jaskandi@gmail.com>',
+      subject: 'Reset Password Link',
+      html: `
+        <h1>Adopt Me Account Reset Password</h1>
+        <p>Click this link below to reset your password.</p>
+        <p>If this request is not what you are going about, please do not click the link and contact our customer service.</p>
+        <a href="${this.configService.get<string>(
+          'CLIENT_URL',
+        )}/reset-password?token=${resetPasswordToken.token}">Reset Password</a>
+        <p>+62 XXX-XXXX-XXXX</p>
+        <p>Adopt Me</p>
+      `,
     });
 
-    return { sendEmail };
+    return sendEmail;
+  }
+
+  async validateResetPassword(token: string) {
+    const storedToken = await this.prismaService.resetPasswordToken.findFirst({
+      where: {
+        token,
+      },
+    });
+
+    if (!storedToken) throw new BadRequestException('Token is invalid.');
+
+    return storedToken;
+  }
+
+  async resetPassword(token: string, { password }: CreateResetPasswordDto) {
+    const storedToken = await this.prismaService.resetPasswordToken.findFirst({
+      where: {
+        token,
+      },
+    });
+
+    if (!storedToken) throw new BadRequestException('Token is invalid.');
+
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: storedToken.id,
+      },
+    });
+
+    if (!user) throw new BadRequestException('User not found.');
+
+    if (bcrypt.compareSync(password, user.password))
+      throw new BadRequestException('Password cannot be the same.');
+
+    await this.prismaService.user.update({
+      data: {
+        password: await bcrypt.hash(password, bcrypt.genSaltSync()),
+      },
+      where: {
+        id: storedToken.id,
+      },
+    });
+
+    await this.prismaService.resetPasswordToken.delete({
+      where: {
+        id: storedToken.id,
+      },
+    });
+
+    return storedToken;
   }
 
   async generateAccessToken(userId: string, refreshToken: string) {
@@ -141,20 +213,14 @@ export class AuthService {
       },
     });
 
-    if (!user) throw new ForbiddenException('Token is invalid.');
-
-    const storedRefreshToken = await this.prismaService.refreshToken.findUnique(
-      {
-        where: {
-          id: userId,
-        },
+    const storedRefreshToken = await this.prismaService.refreshToken.findFirst({
+      where: {
+        id: userId,
+        revokedAt: null,
       },
-    );
+    });
 
-    if (
-      !storedRefreshToken ||
-      !(await bcrypt.compare(refreshToken, storedRefreshToken.token))
-    )
+    if (!storedRefreshToken || refreshToken !== storedRefreshToken.token)
       throw new ForbiddenException('Token is invalid.');
 
     const payload = {
@@ -177,7 +243,7 @@ export class AuthService {
 
     await this.prismaService.refreshToken.update({
       data: {
-        token: bcrypt.hashSync(newRefreshToken, bcrypt.genSaltSync()),
+        token: newRefreshToken,
         expiredAt: dayjs().add(7, 'day').format(),
       },
       where: {
@@ -188,6 +254,7 @@ export class AuthService {
     return {
       newAccessToken,
       newRefreshToken,
+      user,
     };
   }
 
@@ -198,8 +265,11 @@ export class AuthService {
       },
     });
 
-    if (!token) return null;
+    if (!token)
+      throw new BadRequestException(
+        'Cannot logout due to mismatch state in server.',
+      );
 
-    return { token };
+    return token;
   }
 }
