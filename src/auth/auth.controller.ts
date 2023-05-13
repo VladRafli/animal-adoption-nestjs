@@ -31,14 +31,16 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse()
   async login(@Body() readLoginDto: ReadLoginDto) {
-    const loginResult = await this.authService.login(readLoginDto);
+    const { filteredUser, ...tokens } = await this.authService.login(
+      readLoginDto,
+    );
 
     return {
       statusCode: HttpStatus.OK,
       message: 'Successfully logged in.',
       data: {
-        user: loginResult.filteredUser,
-        ...loginResult,
+        user: filteredUser,
+        ...tokens,
       },
     };
   }
