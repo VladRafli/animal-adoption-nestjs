@@ -1,7 +1,6 @@
 import { AuthService } from '@/auth/auth.service';
 import { JwtAuthGuard, JwtRefreshGuard, LocalAuthGuard } from '@/_guard';
 import { RefreshSessionGuard } from '@/_guard/refreshSession.guard';
-import { SessionGuard } from '@/_guard/session.guard';
 import { ms } from '@/_helper';
 import {
   Body,
