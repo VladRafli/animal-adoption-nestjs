@@ -4,15 +4,12 @@ import {
   bodyParser,
   compression,
   dayjs,
-  expressSession,
-  fs,
   morgan,
   rfs,
 } from '@/_helper';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import expressSessionConstants from './_constants/expressSession.constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -46,20 +43,6 @@ async function bootstrap() {
   );
 
   app.use(compression());
-
-  app.use(
-    expressSession({
-      resave: false,
-      saveUninitialized: false,
-      secret: expressSessionConstants.CookieSecret,
-      cookie: {
-        httpOnly: true,
-        secure: false,
-        signed: true,
-        sameSite: true,
-      },
-    }),
-  );
 
   app.use(
     morgan('combined', {

@@ -1,11 +1,6 @@
 import { Roles } from '@/_decorators';
 import { RolesEnum } from '@/_enum';
-import {
-  JwtAuthGuard,
-  RolesGuard,
-  SessionGuard,
-  TransactionGuard,
-} from '@/_guard';
+import { JwtAuthGuard, RolesGuard, TransactionGuard } from '@/_guard';
 import {
   Body,
   Controller,
@@ -30,12 +25,12 @@ import { TransactionsService } from './transactions.service';
   path: 'transactions',
   version: '1',
 })
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Transactions')
 export class TransactionsController {
   constructor(private readonly transactionService: TransactionsService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard)
   @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER)
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse()
@@ -54,7 +49,6 @@ export class TransactionsController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard)
   @Roles(RolesEnum.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse({ isArray: true })
@@ -67,7 +61,6 @@ export class TransactionsController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard)
   @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER, RolesEnum.SHELTER)
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse()
@@ -80,7 +73,7 @@ export class TransactionsController {
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard, TransactionGuard)
+  @UseGuards(TransactionGuard)
   @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER, RolesEnum.SHELTER)
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse()
@@ -96,7 +89,6 @@ export class TransactionsController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard)
   @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER, RolesEnum.SHELTER)
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse()

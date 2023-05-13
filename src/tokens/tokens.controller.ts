@@ -1,6 +1,6 @@
 import { Roles } from '@/_decorators';
 import { RolesEnum } from '@/_enum';
-import { JwtAuthGuard, RolesGuard, SessionGuard } from '@/_guard';
+import { JwtAuthGuard, RolesGuard } from '@/_guard';
 import {
   Body,
   Controller,
@@ -19,13 +19,13 @@ import { TokensService } from './tokens.service';
   path: 'tokens',
   version: '1',
 })
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Tokens')
 export class TokensController {
   constructor(private readonly tokensService: TokensService) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard, SessionGuard, RolesGuard)
   @Roles(RolesEnum.ADMIN)
   @ApiOkResponse()
   async findAll() {
@@ -38,7 +38,6 @@ export class TokensController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard, SessionGuard, RolesGuard)
   @Roles(RolesEnum.ADMIN)
   @ApiOkResponse()
   async findOne(@Param('id') id: string) {
@@ -51,7 +50,6 @@ export class TokensController {
 
   @Post('/revoke')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard, SessionGuard, RolesGuard)
   @Roles(RolesEnum.ADMIN)
   @ApiOkResponse()
   async revoke(@Body() revokeTokenDto: RevokeTokenDto) {

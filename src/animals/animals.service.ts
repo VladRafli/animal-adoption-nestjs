@@ -148,9 +148,7 @@ export class AnimalsService {
         },
       });
 
-      if (animal === null) {
-        throw new BadRequestException('Animal not found');
-      }
+      if (animal === null) throw new BadRequestException('Animal not found');
 
       return animal;
     }
@@ -167,9 +165,7 @@ export class AnimalsService {
       },
     });
 
-    if (animal === null) {
-      throw new BadRequestException('Animal not found');
-    }
+    if (animal === null) throw new BadRequestException('Animal not found');
 
     return animal;
   }
@@ -184,9 +180,7 @@ export class AnimalsService {
       },
     });
 
-    if (animal === null) {
-      throw new BadRequestException('Animal not found');
-    }
+    if (animal === null) throw new BadRequestException('Animal not found');
 
     if (animalPhoto !== undefined) {
       for (const photo of animalPhoto) {

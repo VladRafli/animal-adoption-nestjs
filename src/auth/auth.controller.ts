@@ -4,23 +4,18 @@ import { RefreshSessionGuard } from '@/_guard/refreshSession.guard';
 import { SessionGuard } from '@/_guard/session.guard';
 import { ms } from '@/_helper';
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
   HttpCode,
-  HttpException,
   HttpStatus,
   Param,
   Post,
   Req,
-  Res,
-  Session,
   UseGuards,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { Response } from 'express';
 import { CreateRegisterDto } from './dto/create-register.dto';
 import { CreateResetPasswordDto } from './dto/create-resetPassword.dto';
 import { ReadLoginDto } from './dto/read-login.dto';
@@ -36,21 +31,16 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse()
-  async login(
-    @Body() readLoginDto: ReadLoginDto,
-    @Res({ passthrough: true }) res: Response,
-    @Session() session: Record<string, any>,
-  ) {
+  async login(@Body() readLoginDto: ReadLoginDto) {
     const loginResult = await this.authService.login(readLoginDto);
-
-    session.user = loginResult.filteredUser;
-    session.accessToken = loginResult.accessToken;
-    session.refreshToken = loginResult.refreshToken;
 
     return {
       statusCode: HttpStatus.OK,
       message: 'Successfully logged in.',
-      data: loginResult,
+      data: {
+        user: loginResult.filteredUser,
+        ...loginResult,
+      },
     };
   }
 
@@ -75,8 +65,6 @@ export class AuthController {
   @ApiOkResponse()
   async forgotPassword(@Req() req) {
     const sendEmail = await this.authService.forgotPassword(req.body);
-
-    if (!sendEmail) throw new BadRequestException();
 
     return {
       statusCode: HttpStatus.OK,
@@ -111,38 +99,22 @@ export class AuthController {
   }
 
   @Post('/logout')
-  @UseGuards(JwtAuthGuard, SessionGuard)
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse()
-  async logout(
-    @Req() req,
-    @Res({ passthrough: true }) res: Response,
-    @Session() session: Record<string, any>,
-  ) {
-    const token = await this.authService.logout(req.user.sub);
-
-    return new Promise((resolve, reject) => {
-      session.destroy((err) => {
-        if (err)
-          reject({
-            statusCode: HttpStatus.BAD_REQUEST,
-            message: 'Failed to logout.',
-            data: err,
-          });
-        resolve({
-          statusCode: HttpStatus.OK,
-          message: 'Successfully logged out.',
-          data: token,
-        });
-      });
-    });
+  async logout(@Req() req) {
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Successfully logged out.',
+      data: await this.authService.logout(req.user.sub),
+    };
   }
 
   @Post('/refresh')
   @UseGuards(JwtRefreshGuard, RefreshSessionGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse()
-  async refreshToken(@Req() req, @Session() session: any) {
+  async refreshToken(@Req() req) {
     const userId = req.user.sub;
     const refreshToken =
       req.headers.authorization.split(' ')[1] || req.cookies.refresh_token;
@@ -150,10 +122,6 @@ export class AuthController {
       userId,
       refreshToken,
     );
-
-    session.user = newTokens.user;
-    session.accessToken = newTokens.newAccessToken;
-    session.refreshToken = newTokens.newRefreshToken;
 
     return {
       statusCode: HttpStatus.CREATED,
@@ -166,7 +134,7 @@ export class AuthController {
   }
 
   @Get('/isloggedin')
-  @UseGuards(JwtAuthGuard, SessionGuard)
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Throttle(20, ms('1m'))
   @ApiOkResponse()

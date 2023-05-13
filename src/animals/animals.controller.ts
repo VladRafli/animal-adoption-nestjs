@@ -1,15 +1,19 @@
-import { JwtAuthGuard } from '@/_guard';
+import { Roles } from '@/_decorators';
+import { JwtAuthGuard, RolesGuard } from '@/_guard';
 import {
   Body,
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { AnimalsService } from './animals.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { ReadOrderByAnimalDto } from './dto/read-orderByAnimal.dto';
@@ -19,26 +23,32 @@ import { UpdateAnimalDto } from './dto/update-animal.dto';
   path: 'animal',
   version: '1',
 })
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class AnimalsController {
   constructor(private readonly animalsService: AnimalsService) {}
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @Roles('admin', 'shelter')
+  @ApiCreatedResponse()
   async create(@Req() req, @Body() createAnimalDto: CreateAnimalDto) {
     return {
-      status: 'success',
+      statusCode: HttpStatus.CREATED,
       message: 'Successfully created animal',
       data: await this.animalsService.create(req.user.sub, createAnimalDto),
     };
   }
 
   @Get()
+  @HttpCode(HttpStatus.OK)
+  @Roles('admin', 'shelter', 'adopter')
+  @ApiOkResponse({ isArray: true })
   async findAll(
     @Req() req,
     @Body() readOrderByAnimalDto: ReadOrderByAnimalDto,
   ) {
     return {
-      status: 'success',
+      statusCode: HttpStatus.OK,
       message: 'Successfully retrieved all animals',
       data: await this.animalsService.findAll(
         req.user.sub,
@@ -50,30 +60,39 @@ export class AnimalsController {
   }
 
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @Roles('admin', 'shelter', 'adopter')
+  @ApiOkResponse()
   async findOne(@Req() req, @Param('id') id: string) {
     return {
-      status: 'success',
+      statusCode: HttpStatus.OK,
       message: 'Successfully retrieved animal',
       data: await this.animalsService.findOne(id, req.user.sub),
     };
   }
 
   @Put(':id')
+  @HttpCode(HttpStatus.OK)
+  @Roles('admin', 'shelter')
+  @ApiOkResponse()
   async update(
     @Param('id') id: string,
     @Body() updateAnimalDto: UpdateAnimalDto,
   ) {
     return {
-      status: 'success',
+      statusCode: HttpStatus.OK,
       message: 'Successfully updated animal',
       data: await this.animalsService.update(id, updateAnimalDto),
     };
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @Roles('admin', 'shelter')
+  @ApiOkResponse()
   async remove(@Param('id') id: string) {
     return {
-      status: 'success',
+      statusCode: HttpStatus.OK,
       message: 'Successfully deleted animal',
       data: await this.animalsService.remove(id),
     };

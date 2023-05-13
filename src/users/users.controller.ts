@@ -1,6 +1,6 @@
 import { Roles } from '@/_decorators';
 import { RolesEnum } from '@/_enum';
-import { JwtAuthGuard, RolesGuard, SessionGuard } from '@/_guard';
+import { JwtAuthGuard, RolesGuard } from '@/_guard';
 import {
   Body,
   Controller,
@@ -22,12 +22,12 @@ import { UsersService } from './users.service';
   path: 'users',
   version: '1',
 })
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard)
   @Roles(RolesEnum.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse()
@@ -40,7 +40,6 @@ export class UsersController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard)
   @Roles(RolesEnum.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ isArray: true })
@@ -53,7 +52,6 @@ export class UsersController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard)
   @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER, RolesEnum.SHELTER)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse()
@@ -66,7 +64,6 @@ export class UsersController {
   }
 
   @Put(':username')
-  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard)
   @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER, RolesEnum.SHELTER)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse()
@@ -79,7 +76,6 @@ export class UsersController {
   }
 
   @Delete(':username')
-  @UseGuards(JwtAuthGuard, RolesGuard, SessionGuard)
   @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER, RolesEnum.SHELTER)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse()
