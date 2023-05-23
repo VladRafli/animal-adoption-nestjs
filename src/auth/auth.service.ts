@@ -68,7 +68,7 @@ export class AuthService {
     };
 
     const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '10m',
+      expiresIn: '1d',
       issuer: 'adoptme.my.id',
       secret: jwtConstants.JwtSecret,
     });
