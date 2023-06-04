@@ -1,6 +1,6 @@
 import { bcrypt, uuid } from '@/_helper';
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/_provider/prisma/prisma.service';
+import { PrismaService } from '@/_provider/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 

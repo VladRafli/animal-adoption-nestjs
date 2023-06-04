@@ -1,6 +1,7 @@
 import { uuid } from '@/_helper';
 import { LocalStorageService } from '@/_provider/local-storage/local-storage.service';
 import { PrismaService } from '@/_provider/prisma/prisma.service';
+import { S3StorageService } from '@/_provider/s3-storage/s3-storage.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { CreateAnimalDto } from './dto/create-animal.dto';
@@ -11,6 +12,7 @@ export class AnimalsService {
   constructor(
     private prismaService: PrismaService,
     private localStorageService: LocalStorageService,
+    private s3StorageService: S3StorageService,
   ) {}
 
   async create(userId: string, createAnimalDto: CreateAnimalDto) {
@@ -28,8 +30,12 @@ export class AnimalsService {
     if (animalPhoto !== undefined) {
       for (const photo of animalPhoto) {
         uploadedFiles.push(
-          await this.localStorageService.uploadFile(
-            `${animalId}/${photo.type}/${photo.filename}`,
+          // await this.localStorageService.uploadFile(
+          //   `${animalId}/${photo.type}/${photo.filename}`,
+          //   Buffer.from(photo.buffer, 'base64'),
+          // ),
+          await this.s3StorageService.uploadFile(
+            `animal/${animalId}/${photo.type}/${photo.filename}`,
             Buffer.from(photo.buffer, 'base64'),
           ),
         );
@@ -55,9 +61,7 @@ export class AnimalsService {
               animalPhoto !== undefined
                 ? animalPhoto.map((val, idx) => ({
                     id: uuid.v4(),
-                    extension: uploadedFiles[idx].extension,
-                    path: uploadedFiles[idx].path,
-                    size: uploadedFiles[idx].size,
+                    path: uploadedFiles[idx].Location,
                     type: val.type,
                   }))
                 : [],
@@ -195,17 +199,20 @@ export class AnimalsService {
         if (oldPhoto) {
           await this.localStorageService.deleteFile(oldPhoto.path);
 
-          const uploadedFile = await this.localStorageService.uploadFile(
-            `${id}/${photo.type}/${photo.filename}`,
+          // const uploadedFile = await this.localStorageService.uploadFile(
+          //   `${id}/${photo.type}/${photo.filename}`,
+          //   Buffer.from(photo.buffer, 'base64'),
+          // );
+
+          const uploadedFile = await this.s3StorageService.uploadFile(
+            `animal/${id}/${photo.type}/${photo.filename}`,
             Buffer.from(photo.buffer, 'base64'),
           );
 
           updatedAnimalPhoto.push(
             await this.prismaService.animalPhoto.update({
               data: {
-                extension: uploadedFile.extension,
-                path: uploadedFile.path,
-                size: uploadedFile.size,
+                path: uploadedFile.Location,
                 type: photo.type,
               },
               where: {
@@ -214,8 +221,13 @@ export class AnimalsService {
             }),
           );
         } else {
-          const uploadedFile = await this.localStorageService.uploadFile(
-            `${id}/${photo.type}/${photo.filename}`,
+          // const uploadedFile = await this.localStorageService.uploadFile(
+          //   `${id}/${photo.type}/${photo.filename}`,
+          //   Buffer.from(photo.buffer, 'base64'),
+          // );
+
+          const uploadedFile = await this.s3StorageService.uploadFile(
+            `animal/${id}/${photo.type}/${photo.filename}`,
             Buffer.from(photo.buffer, 'base64'),
           );
 
@@ -223,9 +235,7 @@ export class AnimalsService {
             await this.prismaService.animalPhoto.create({
               data: {
                 id: uuid.v4(),
-                extension: uploadedFile.extension,
-                path: uploadedFile.path,
-                size: uploadedFile.size,
+                path: uploadedFile.Location,
                 type: photo.type,
                 animal: {
                   connect: {

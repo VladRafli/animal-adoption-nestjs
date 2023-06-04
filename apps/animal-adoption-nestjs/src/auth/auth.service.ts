@@ -1,5 +1,6 @@
 import jwtConstants from '@/_constants/jwt.constants';
 import { bcrypt, dayjs, uuid } from '@/_helper';
+import { S3StorageService } from '@/_provider';
 import { PrismaService } from '@/_provider/prisma/prisma.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import {
@@ -21,6 +22,7 @@ export class AuthService {
     private prismaService: PrismaService,
     private mailerService: MailerService,
     private configService: ConfigService,
+    private s3StorageService: S3StorageService,
   ) {}
 
   async validateUser({ email, password }: ReadLoginDto): Promise<any> {
@@ -102,6 +104,9 @@ export class AuthService {
   }
 
   async register(user: CreateRegisterDto) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { profilePicture, ...filteredUser } = user;
+
     const existingUser = await this.prismaService.user.findUnique({
       where: {
         email: user.email,
@@ -110,11 +115,23 @@ export class AuthService {
 
     if (existingUser) throw new BadRequestException('User already exists.');
 
+    const userId = uuid.v4();
+
     user.password = await bcrypt.hash(user.password, bcrypt.genSaltSync());
+
     return await this.prismaService.user.create({
       data: {
-        id: uuid.v4(),
-        ...user,
+        id: userId,
+        profilePicture:
+          user.profilePicture !== undefined
+            ? (
+                await this.s3StorageService.uploadFile(
+                  `profile/${userId}/${uuid.v4()}.jpg`,
+                  Buffer.from(user.profilePicture, 'base64'),
+                )
+              ).Location
+            : null,
+        ...filteredUser,
       },
     });
   }

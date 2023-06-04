@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Debug Nest Framework",
-            "args": ["${workspaceFolder}/src/main.ts"],
+            "args": ["${workspaceFolder}/apps/animal-adoption-nestjs/src/main.ts"],
             "runtimeArgs": [
               "--nolazy",
               "-r",

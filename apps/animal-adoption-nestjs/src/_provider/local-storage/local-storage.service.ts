@@ -50,7 +50,9 @@ export class LocalStorageService {
       await fs.promises.writeFile(resultPath, buffer);
 
       return {
-        path: resultPath,
+        path: path
+          .join('storage', dirPath, `${uuid.v4()}${fileExtension}`)
+          .replace('\\', '/'),
         extension: fileExtension,
         size: 0, // TODO: get file size (not implemented due to how api consumed)
       };

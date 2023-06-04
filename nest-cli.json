@@ -1,8 +1,32 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/animal-adoption-nestjs/src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/animal-adoption-nestjs/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/animal-adoption-nestjs",
+  "projects": {
+    "animal-adoption-nestjs": {
+      "type": "application",
+      "root": "apps/animal-adoption-nestjs",
+      "entryFile": "main",
+      "sourceRoot": "apps/animal-adoption-nestjs/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/animal-adoption-nestjs/tsconfig.app.json"
+      }
+    },
+    "statistics": {
+      "type": "application",
+      "root": "apps/statistics",
+      "entryFile": "main",
+      "sourceRoot": "apps/statistics/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/statistics/tsconfig.app.json"
+      }
+    }
   }
 }
