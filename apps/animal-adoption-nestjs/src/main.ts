@@ -52,7 +52,6 @@ async function bootstrap() {
         },
         {
           interval: '1d',
-          compress: 'gzip',
           path: `${appRootPath.path}/logs/access`,
         },
       ),
