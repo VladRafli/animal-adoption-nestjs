@@ -117,7 +117,10 @@ export class AuthService {
 
     const userId = uuid.v4();
 
-    user.password = await bcrypt.hash(user.password, bcrypt.genSaltSync());
+    filteredUser.password = await bcrypt.hash(
+      user.password,
+      bcrypt.genSaltSync(),
+    );
 
     return await this.prismaService.user.create({
       data: {
