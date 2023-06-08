@@ -78,14 +78,12 @@ export class AnimalsService {
   }
 
   async findAll(
-    userId: string,
     skip?: number,
     take?: number,
     orderBy?: Prisma.Enumerable<Prisma.AnimalOrderByWithRelationInput>,
   ) {
     const animal = await this.prismaService.animal.findMany({
       where: {
-        userId,
         deletedAt: null, // If Soft deleted
       },
       include: {
@@ -104,10 +102,9 @@ export class AnimalsService {
     return animal;
   }
 
-  async findOne(id: string, userId: string) {
+  async findOne(id: string) {
     const animal = await this.prismaService.animal.findFirst({
       where: {
-        userId,
         id,
         deletedAt: null, // If Soft deleted
       },

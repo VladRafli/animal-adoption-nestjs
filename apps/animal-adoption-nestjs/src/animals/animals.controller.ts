@@ -51,7 +51,6 @@ export class AnimalsController {
       statusCode: HttpStatus.OK,
       message: 'Successfully retrieved all animals',
       data: await this.animalsService.findAll(
-        req.user.sub,
         req.query.skip !== undefined ? parseInt(req.query.skip) : undefined,
         req.query.take !== undefined ? parseInt(req.query.take) : undefined,
         readOrderByAnimalDto,
@@ -63,11 +62,11 @@ export class AnimalsController {
   @HttpCode(HttpStatus.OK)
   @Roles('admin', 'shelter', 'adopter')
   @ApiOkResponse()
-  async findOne(@Req() req, @Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return {
       statusCode: HttpStatus.OK,
       message: 'Successfully retrieved animal',
-      data: await this.animalsService.findOne(id, req.user.sub),
+      data: await this.animalsService.findOne(id),
     };
   }
 
