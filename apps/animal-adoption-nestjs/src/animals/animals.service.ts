@@ -83,34 +83,6 @@ export class AnimalsService {
     take?: number,
     orderBy?: Prisma.Enumerable<Prisma.AnimalOrderByWithRelationInput>,
   ) {
-    // const user = await this.prismaService.user.findFirst({
-    //   where: {
-    //     id: userId,
-    //     deletedAt: null, // If Soft deleted
-    //   },
-    // });
-
-    // if (user.role === 'admin') {
-    //   const animal = await this.prismaService.animal.findMany({
-    //     where: {
-    //       deletedAt: null, // If Soft deleted
-    //     },
-    //     include: {
-    //       animalPhoto: true,
-    //       animalType: true,
-    //     },
-    //     skip,
-    //     take,
-    //     orderBy,
-    //   });
-
-    //   if (animal === null) {
-    //     throw new BadRequestException('Animal not found');
-    //   }
-
-    //   return animal;
-    // }
-
     const animal = await this.prismaService.animal.findMany({
       where: {
         userId,
@@ -133,30 +105,6 @@ export class AnimalsService {
   }
 
   async findOne(id: string, userId: string) {
-    const user = await this.prismaService.user.findFirst({
-      where: {
-        id: userId,
-        deletedAt: null, // If Soft deleted
-      },
-    });
-
-    if (user.role === 'admin') {
-      const animal = await this.prismaService.animal.findFirst({
-        where: {
-          id,
-          deletedAt: null, // If Soft deleted
-        },
-        include: {
-          animalPhoto: true,
-          animalType: true,
-        },
-      });
-
-      if (animal === null) throw new BadRequestException('Animal not found');
-
-      return animal;
-    }
-
     const animal = await this.prismaService.animal.findFirst({
       where: {
         userId,
