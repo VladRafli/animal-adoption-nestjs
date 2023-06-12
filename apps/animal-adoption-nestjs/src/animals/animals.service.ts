@@ -78,12 +78,14 @@ export class AnimalsService {
   }
 
   async findAll(
+    userId: string,
     skip?: number,
     take?: number,
     orderBy?: Prisma.Enumerable<Prisma.AnimalOrderByWithRelationInput>,
   ) {
     const animal = await this.prismaService.animal.findMany({
       where: {
+        userId,
         deletedAt: null, // If Soft deleted
       },
       include: {

@@ -5,7 +5,7 @@ import * as uuid from 'uuid';
 const prisma = new PrismaClient();
 
 export default async function User() {
-  const userId = Array.from({ length: 3 }).map(() => uuid.v4());
+  const userId = Array.from({ length: 4 }).map(() => uuid.v4());
   await prisma.user.createMany({
     data: [
       {
@@ -27,6 +27,13 @@ export default async function User() {
         email: 'shelter@example.com',
         password: Bcrypt.hashSync('shelter', Bcrypt.genSaltSync()),
         name: 'Shelter',
+        role: 'shelter',
+      },
+      {
+        id: userId[3],
+        email: 'shelter2@example.com',
+        password: Bcrypt.hashSync('shelter', Bcrypt.genSaltSync()),
+        name: 'Shelter2',
         role: 'shelter',
       },
     ],

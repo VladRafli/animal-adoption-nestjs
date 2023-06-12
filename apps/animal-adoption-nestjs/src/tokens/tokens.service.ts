@@ -11,11 +11,28 @@ export class TokensService {
       where: {
         id,
       },
+      include: {
+        user: {
+          select: {
+            email: true,
+            role: true,
+          },
+        },
+      },
     });
   }
 
   async findAll() {
-    return await this.prismaService.refreshToken.findMany();
+    return await this.prismaService.refreshToken.findMany({
+      include: {
+        user: {
+          select: {
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
   }
 
   async revokeToken(id: string) {
@@ -25,6 +42,14 @@ export class TokensService {
       },
       where: {
         id,
+      },
+      include: {
+        user: {
+          select: {
+            email: true,
+            role: true,
+          },
+        },
       },
     });
   }

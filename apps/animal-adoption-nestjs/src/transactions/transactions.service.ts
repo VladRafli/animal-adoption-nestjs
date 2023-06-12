@@ -13,14 +13,32 @@ export class TransactionsService {
     return await this.prismaService.adoptionTransaction.create({
       data: {
         id: uuid.v4(),
-        status: TransactionStatus.ON_REVIEW,
+        status: TransactionStatus.REQUEST_RECIEVED,
         ...createTransactionDto,
+      },
+      include: {
+        animal: {
+          include: {
+            animalPhoto: true,
+            animalType: true,
+          },
+        },
+        user: true,
       },
     });
   }
 
   async findAll(skip: number, take: number) {
     return await this.prismaService.adoptionTransaction.findMany({
+      include: {
+        animal: {
+          include: {
+            animalPhoto: true,
+            animalType: true,
+          },
+        },
+        user: true,
+      },
       skip,
       take,
     });
@@ -30,6 +48,15 @@ export class TransactionsService {
     return await this.prismaService.adoptionTransaction.findUnique({
       where: {
         id,
+      },
+      include: {
+        animal: {
+          include: {
+            animalPhoto: true,
+            animalType: true,
+          },
+        },
+        user: true,
       },
     });
   }
@@ -42,6 +69,15 @@ export class TransactionsService {
       where: {
         id,
       },
+      include: {
+        animal: {
+          include: {
+            animalPhoto: true,
+            animalType: true,
+          },
+        },
+        user: true,
+      },
     });
   }
 
@@ -49,6 +85,15 @@ export class TransactionsService {
     return await this.prismaService.adoptionTransaction.delete({
       where: {
         id,
+      },
+      include: {
+        animal: {
+          include: {
+            animalPhoto: true,
+            animalType: true,
+          },
+        },
+        user: true,
       },
     });
   }

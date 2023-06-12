@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { ResetPasswordToken } from '@prisma/client';
 import { CreateForgotPasswordDto } from './dto/create-forgotPassword.dto';
 import { CreateRegisterDto } from './dto/create-register.dto';
 import { CreateResetPasswordDto } from './dto/create-resetPassword.dto';
@@ -105,7 +106,7 @@ export class AuthService {
 
   async register(user: CreateRegisterDto) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { profilePicture, ...filteredUser } = user;
+    const { password, profilePicture, ...rest } = user;
 
     const existingUser = await this.prismaService.user.findUnique({
       where: {
@@ -117,14 +118,10 @@ export class AuthService {
 
     const userId = uuid.v4();
 
-    filteredUser.password = await bcrypt.hash(
-      user.password,
-      bcrypt.genSaltSync(),
-    );
-
     return await this.prismaService.user.create({
       data: {
         id: userId,
+        password: await bcrypt.hash(password, bcrypt.genSaltSync()),
         profilePicture:
           user.profilePicture !== undefined
             ? (
@@ -134,7 +131,7 @@ export class AuthService {
                 )
               ).Location
             : null,
-        ...filteredUser,
+        ...rest,
       },
     });
   }
@@ -148,8 +145,27 @@ export class AuthService {
 
     if (!user) throw new BadRequestException('User not found.');
 
-    const resetPasswordToken =
-      await this.prismaService.resetPasswordToken.create({
+    const existingResetPasswordToken =
+      await this.prismaService.resetPasswordToken.findFirst({
+        where: {
+          id: user.id,
+        },
+      });
+
+    let resetPasswordToken: ResetPasswordToken;
+
+    if (existingResetPasswordToken)
+      resetPasswordToken = await this.prismaService.resetPasswordToken.update({
+        data: {
+          token: uuid.v4(),
+          expiredAt: dayjs().add(1, 'day').format(),
+        },
+        where: {
+          id: user.id,
+        },
+      });
+    else
+      resetPasswordToken = await this.prismaService.resetPasswordToken.create({
         data: {
           id: user.id,
           token: uuid.v4(),
@@ -167,7 +183,9 @@ export class AuthService {
         <p>If this request is not what you are going about, please do not click the link and contact our customer service.</p>
         <a href="${this.configService.get<string>(
           'CLIENT_URL',
-        )}/reset-password?token=${resetPasswordToken.token}">Reset Password</a>
+        )}/auth/change-password?token=${
+        resetPasswordToken.token
+      }">Reset Password</a>
         <p>+62 XXX-XXXX-XXXX</p>
         <p>Adopt Me</p>
       `,

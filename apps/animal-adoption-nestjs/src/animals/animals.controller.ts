@@ -10,6 +10,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -46,11 +47,13 @@ export class AnimalsController {
   async findAll(
     @Req() req,
     @Body() readOrderByAnimalDto: ReadOrderByAnimalDto,
+    @Query('shelter') isShelter: string,
   ) {
     return {
       statusCode: HttpStatus.OK,
       message: 'Successfully retrieved all animals',
       data: await this.animalsService.findAll(
+        isShelter === 'true' ? req.user.sub : undefined,
         req.query.skip !== undefined ? parseInt(req.query.skip) : undefined,
         req.query.take !== undefined ? parseInt(req.query.take) : undefined,
         readOrderByAnimalDto,

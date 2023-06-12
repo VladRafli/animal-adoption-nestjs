@@ -15,6 +15,7 @@ async function main() {
   const user = await User();
   const animalType = await AnimalType();
   await Animal({ user: { userId: user.userId[2] }, animalType });
+  await Animal({ user: { userId: user.userId[3] }, animalType });
 }
 main()
   .then(async () => {

@@ -31,7 +31,8 @@ export class TransactionsController {
   constructor(private readonly transactionService: TransactionsService) {}
 
   @Post()
-  @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER)
+  @Roles(RolesEnum.ADOPTER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse()
   async create(
@@ -49,7 +50,8 @@ export class TransactionsController {
   }
 
   @Get()
-  @Roles(RolesEnum.ADMIN)
+  @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER, RolesEnum.SHELTER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse({ isArray: true })
   async findAll(@Query() query: ReadAllTransactionsDto) {
@@ -62,6 +64,7 @@ export class TransactionsController {
 
   @Get(':id')
   @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER, RolesEnum.SHELTER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse()
   async findOne(@Param('id') id: string) {
@@ -73,8 +76,8 @@ export class TransactionsController {
   }
 
   @Put(':id')
-  @UseGuards(TransactionGuard)
   @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER, RolesEnum.SHELTER)
+  @UseGuards(JwtAuthGuard, RolesGuard, TransactionGuard)
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse()
   async update(
@@ -90,6 +93,7 @@ export class TransactionsController {
 
   @Delete(':id')
   @Roles(RolesEnum.ADMIN, RolesEnum.ADOPTER, RolesEnum.SHELTER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse()
   async remove(@Param('id') id: string) {
