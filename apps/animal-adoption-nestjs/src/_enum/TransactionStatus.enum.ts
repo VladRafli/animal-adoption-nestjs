@@ -5,5 +5,6 @@ export enum TransactionStatus {
   WAITING_FOR_CONFIRMATION = 'wfc',
   ON_DELIVERY = 'delivery',
   REQUEST_CANCELLED = 'cancelled',
+  REQUEST_REJECTED = 'rejected',
   REQUEST_FINISHED = 'finished',
 }

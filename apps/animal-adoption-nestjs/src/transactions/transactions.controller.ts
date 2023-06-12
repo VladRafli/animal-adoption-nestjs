@@ -54,11 +54,16 @@ export class TransactionsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse({ isArray: true })
-  async findAll(@Query() query: ReadAllTransactionsDto) {
+  async findAll(@Req() req, @Query() query: ReadAllTransactionsDto) {
     return {
       statusCode: HttpStatus.OK,
       message: 'Successfully retrieved all transaction.',
-      data: await this.transactionService.findAll(query.skip, query.take),
+      data: await this.transactionService.findAll(
+        req.user.sub,
+        req.user.role,
+        query.skip,
+        query.take,
+      ),
     };
   }
 
@@ -67,11 +72,15 @@ export class TransactionsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse()
-  async findOne(@Param('id') id: string) {
+  async findOne(@Req() req, @Param('id') id: string) {
     return {
       statusCode: HttpStatus.OK,
       message: 'Successfully retrieved transaction.',
-      data: await this.transactionService.findOne(id),
+      data: await this.transactionService.findOne(
+        id,
+        req.user.sub,
+        req.user.role,
+      ),
     };
   }
 
