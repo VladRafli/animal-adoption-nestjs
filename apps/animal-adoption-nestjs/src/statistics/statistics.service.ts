@@ -13,6 +13,10 @@ export class StatisticsService {
           animalStatistics: true,
           userStatistics: true,
         },
+        take: 8,
+        orderBy: {
+          createdAt: 'desc',
+        },
       });
     }
 
@@ -21,6 +25,10 @@ export class StatisticsService {
         include: {
           ShelterAdoptionStatistics: true,
           ShelterAnimalStatistics: true,
+        },
+        take: 8,
+        orderBy: {
+          createdAt: 'desc',
         },
       });
     }
