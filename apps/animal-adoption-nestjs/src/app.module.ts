@@ -13,6 +13,7 @@ import { TokensModule } from './tokens/tokens.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { UsersModule } from './users/users.module';
 import { S3StorageModule } from './_provider/s3-storage/s3-storage.module';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { S3StorageModule } from './_provider/s3-storage/s3-storage.module';
     UsersModule,
     TransactionsModule,
     TokensModule,
+    StatisticsModule,
   ],
 })
 export class AppModule {}

@@ -147,6 +147,39 @@ model AdoptionStatistics {
   ApplicationStatistics ApplicationStatistics[]
 }
 
+model ShelterStatistics {
+  id                        Int                       @id @unique @default(autoincrement()) @db.Int
+  shelterAnimalStatisticsId Int                       @db.Int
+  shelterAdoptionStatistics Int                       @db.Int
+  createdAt                 DateTime                  @default(now()) @db.DateTime
+  updatedAt                 DateTime                  @updatedAt @db.DateTime
+  deletedAt                 DateTime?                 @db.DateTime
+  ShelterAnimalStatistics   ShelterAnimalStatistics   @relation(fields: [shelterAnimalStatisticsId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  ShelterAdoptionStatistics ShelterAdoptionStatistics @relation(fields: [shelterAdoptionStatistics], references: [id], onUpdate: Cascade, onDelete: NoAction)
+}
+
+model ShelterAnimalStatistics {
+  id                Int                 @id @unique @default(autoincrement()) @db.Int
+  totalAdoption     Int                 @db.Int
+  totalCatAdoption  Int                 @db.Int
+  totalDogAdoption  Int                 @db.Int
+  createdAt         DateTime            @default(now()) @db.DateTime
+  updatedAt         DateTime            @updatedAt @db.DateTime
+  deletedAt         DateTime?           @db.DateTime
+  ShelterStatistics ShelterStatistics[]
+}
+
+model ShelterAdoptionStatistics {
+  id                Int                 @id @unique @default(autoincrement()) @db.Int
+  totalAdoption     Int                 @db.Int
+  totalCatAdoption  Int                 @db.Int
+  totalDogAdoption  Int                 @db.Int
+  createdAt         DateTime            @default(now()) @db.DateTime
+  updatedAt         DateTime            @updatedAt @db.DateTime
+  deletedAt         DateTime?           @db.DateTime
+  ShelterStatistics ShelterStatistics[]
+}
+
 enum AnimalGender {
   male
   female
