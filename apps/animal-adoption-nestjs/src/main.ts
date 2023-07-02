@@ -6,18 +6,34 @@ import {
   dayjs,
   morgan,
   rfs,
+  fs,
 } from '@/_helper';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import {
+  INestApplication,
+  ValidationPipe,
+  VersioningType,
+} from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    // httpsOptions: {
-    //   key: fs.readFileSync('./certs/minica-key.pem'),
-    //   cert: fs.readFileSync('./certs/minica.pem'),
-    // },
-  });
+  let app: INestApplication;
+  const keyPath = './certs/minica-key.pem';
+  const certPath = './certs/minica.pem';
+
+  if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+    app = await NestFactory.create(AppModule, {
+      httpsOptions: {
+        key: fs.readFileSync(keyPath),
+        cert: fs.readFileSync(certPath),
+      },
+    });
+
+    console.log('HTTPS enabled');
+  } else {
+    app = await NestFactory.create(AppModule);
+    console.log('HTTPS disabled');
+  }
 
   const config = new DocumentBuilder()
     .setTitle('Animal Adoption')

@@ -21,9 +21,9 @@ Part of Thesis Project by:
 
 To start using PM2, run start.bat for Windows, run start.sh for Linux or MacOS
 
-Email account used served by [https://www.guerrillamail.com/](https://www.guerrillamail.com/). Make burner email for testing.
+Email is send via smtp supported with [https://www.brevo.com/](https://www.brevo.com/) using its free plan
 
-Testing messages using [https://ethereal.email/](https://ethereal.email/).
+Testing email messages using [https://ethereal.email/](https://ethereal.email/).
 
 For be able to use secure cookies, make sure the certificates are available in ./certs folder. Certificate generated with [minica](https://github.com/jsha/minica)
 
@@ -36,16 +36,13 @@ For now, deploy these as Docker Container:
 - Portainer (https://hub.docker.com/r/portainer/portainer-ce) - Manage Docker Containers (Use community edition) - Copy & paste "docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest" to terminal
 - Mariadb (https://hub.docker.com/_/mariadb) - Name it like "mariadb-local" - Open port 3306:3306 - Env: MARIADB_USER, MARIADB_PASSWORD, MARIADB_ROOT_PASSWORD
 - PHPMyAdmin (https://hub.docker.com/_/phpmyadmin) - Copy & paste "docker run --name phpmyadmin -d --link <mariadb_container_name>:db -p 8080:80 phpmyadmin" to terminal
-- Redis-Stack (https://hub.docker.com/r/redis/redis-stack) - Copy & paste "docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest" to terminal
 Access database using its IP (If VM, check the IP Address).
 
 Open port 8080 for PHPMyAdmin
 
-Open port 8001 for Redis Insight
-
 ## Deployment
 
-Deployed on AWS with EC2 Free tier, and AWS RDBMS Service.
+Deployed on AWS with EC2 Free tier, AWS RDBMS, and S3 Storage Service.
 
 ## Code Standards
 

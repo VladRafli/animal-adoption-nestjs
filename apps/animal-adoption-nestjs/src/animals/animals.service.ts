@@ -122,7 +122,7 @@ export class AnimalsService {
   }
 
   async update(id: string, updateAnimalDto: UpdateAnimalDto) {
-    const { animalPhoto, ...animalDto } = updateAnimalDto;
+    const { animalPhoto, type, ...animalDto } = updateAnimalDto;
     const updatedAnimalPhoto = [];
 
     const animal = await this.prismaService.animal.findFirst({
@@ -146,11 +146,6 @@ export class AnimalsService {
         if (oldPhoto) {
           await this.localStorageService.deleteFile(oldPhoto.path);
 
-          // const uploadedFile = await this.localStorageService.uploadFile(
-          //   `${id}/${photo.type}/${photo.filename}`,
-          //   Buffer.from(photo.buffer, 'base64'),
-          // );
-
           const uploadedFile = await this.s3StorageService.uploadFile(
             `animal/${id}/${photo.type}/${photo.filename}`,
             Buffer.from(photo.buffer, 'base64'),
@@ -168,11 +163,6 @@ export class AnimalsService {
             }),
           );
         } else {
-          // const uploadedFile = await this.localStorageService.uploadFile(
-          //   `${id}/${photo.type}/${photo.filename}`,
-          //   Buffer.from(photo.buffer, 'base64'),
-          // );
-
           const uploadedFile = await this.s3StorageService.uploadFile(
             `animal/${id}/${photo.type}/${photo.filename}`,
             Buffer.from(photo.buffer, 'base64'),
@@ -196,28 +186,26 @@ export class AnimalsService {
       }
     }
 
+    const animalType = await this.prismaService.animalType.findFirst({
+      where: {
+        name: type,
+      },
+    });
+
     const updatedAnimal = await this.prismaService.animal.update({
-      data: animalDto,
+      data: {
+        animalType: {
+          update: {
+            id: animalType.id,
+            name: animalType.name,
+          },
+        },
+        ...animalDto,
+      },
       where: {
         id,
       },
     });
-
-    // const updatedAnimalPhoto = await this.prismaService.animalPhoto.updateMany({
-    //   data:
-    //     animalPhoto !== undefined
-    //       ? animalPhoto.map((val, idx) => ({
-    //           extension: uploadedFiles[idx].extension,
-    //           path: uploadedFiles[idx].path,
-    //           size: uploadedFiles[idx].size,
-    //           type: val.type,
-    //         }))
-    //       : [],
-    //   where: {
-    //     animalId: id,
-    //     deletedAt: null, // If Soft deleted
-    //   },
-    // });
 
     return {
       animal: {
