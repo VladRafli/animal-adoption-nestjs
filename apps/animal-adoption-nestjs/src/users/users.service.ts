@@ -46,7 +46,8 @@ export class UsersService {
 
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.findOne(id);
-    const { password, profilePicture, ...rest } = updateUserDto;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, profilePicture, email, ...rest } = updateUserDto;
 
     return await this.prisma.user.update({
       where: { id: user.id },
