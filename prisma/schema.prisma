@@ -23,9 +23,13 @@ model User {
   updatedAt           DateTime              @updatedAt @db.DateTime
   deletedAt           DateTime?             @db.DateTime
   animal              Animal[]
-  RefreshToken        RefreshToken?
-  AdoptionTransaction AdoptionTransaction[]
-  ResetPasswordToken  ResetPasswordToken[]
+  refreshToken        RefreshToken?
+  adoptionTransaction AdoptionTransaction[]
+  resetPasswordToken  ResetPasswordToken[]
+  fromChatRoom        ChatRoom[]            @relation(name: "from")
+  toChatRoom          ChatRoom[]            @relation(name: "to")
+  chatSender          Chat[]                @relation(name: "sender")
+  chatReciever        Chat[]                @relation(name: "reciever")
 }
 
 model RefreshToken {
@@ -74,7 +78,7 @@ model Animal {
   user                User                  @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: NoAction)
   animalType          AnimalType            @relation(fields: [animalTypeId], references: [id], onUpdate: Cascade, onDelete: NoAction)
   animalPhoto         AnimalPhoto[]
-  AdoptionTransaction AdoptionTransaction[]
+  adoptionTransaction AdoptionTransaction[]
 }
 
 model AnimalPhoto {
@@ -86,6 +90,32 @@ model AnimalPhoto {
   updatedAt DateTime  @updatedAt @db.DateTime
   deletedAt DateTime? @db.DateTime
   animal    Animal    @relation(fields: [animalId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+}
+
+model ChatRoom {
+  id        String    @id @unique @db.Char(40)
+  fromId      String    @db.Char(40)
+  toId        String    @db.Char(40)
+  createdAt DateTime  @default(now()) @db.DateTime
+  updatedAt DateTime  @updatedAt @db.DateTime
+  deletedAt DateTime? @db.DateTime
+  from      User      @relation(name: "from", fields: [fromId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  to        User      @relation(name: "to", fields: [toId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  chat      Chat[]
+}
+
+model Chat {
+  id         String    @id @unique @db.Char(40)
+  chatRoomId String    @db.Char(40)
+  senderId     String    @db.Char(40)
+  receiverId   String    @db.Char(40)
+  message    String    @db.VarChar(255)
+  createdAt  DateTime  @default(now()) @db.DateTime
+  updatedAt  DateTime  @updatedAt @db.DateTime
+  deletedAt  DateTime? @db.DateTime
+  chatRoom   ChatRoom  @relation(fields: [chatRoomId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  sender     User      @relation(name: "sender", fields: [senderId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  receiver   User      @relation(name: "reciever", fields: [receiverId], references: [id], onUpdate: Cascade, onDelete: NoAction)
 }
 
 model AdoptionTransaction {
@@ -122,7 +152,7 @@ model UserStatistics {
   createdAt             DateTime                @default(now()) @db.DateTime
   updatedAt             DateTime                @updatedAt @db.DateTime
   deletedAt             DateTime?               @db.DateTime
-  ApplicationStatistics ApplicationStatistics[]
+  applicationStatistics ApplicationStatistics[]
 }
 
 model AnimalStatistics {
@@ -133,7 +163,7 @@ model AnimalStatistics {
   createdAt             DateTime                @default(now()) @db.DateTime
   updatedAt             DateTime                @updatedAt @db.DateTime
   deletedAt             DateTime?               @db.DateTime
-  ApplicationStatistics ApplicationStatistics[]
+  applicationStatistics ApplicationStatistics[]
 }
 
 model AdoptionStatistics {
@@ -144,18 +174,18 @@ model AdoptionStatistics {
   createdAt             DateTime                @default(now()) @db.DateTime
   updatedAt             DateTime                @updatedAt @db.DateTime
   deletedAt             DateTime?               @db.DateTime
-  ApplicationStatistics ApplicationStatistics[]
+  applicationStatistics ApplicationStatistics[]
 }
 
 model ShelterStatistics {
   id                        Int                       @id @unique @default(autoincrement()) @db.Int
   shelterAnimalStatisticsId Int                       @db.Int
-  shelterAdoptionStatistics Int                       @db.Int
+  shelterAdoptionStatisticsId Int                       @db.Int
   createdAt                 DateTime                  @default(now()) @db.DateTime
   updatedAt                 DateTime                  @updatedAt @db.DateTime
   deletedAt                 DateTime?                 @db.DateTime
-  ShelterAnimalStatistics   ShelterAnimalStatistics   @relation(fields: [shelterAnimalStatisticsId], references: [id], onUpdate: Cascade, onDelete: NoAction)
-  ShelterAdoptionStatistics ShelterAdoptionStatistics @relation(fields: [shelterAdoptionStatistics], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  shelterAnimalStatistics   ShelterAnimalStatistics   @relation(fields: [shelterAnimalStatisticsId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  shelterAdoptionStatistics ShelterAdoptionStatistics @relation(fields: [shelterAdoptionStatisticsId], references: [id], onUpdate: Cascade, onDelete: NoAction)
 }
 
 model ShelterAnimalStatistics {
@@ -166,7 +196,7 @@ model ShelterAnimalStatistics {
   createdAt         DateTime            @default(now()) @db.DateTime
   updatedAt         DateTime            @updatedAt @db.DateTime
   deletedAt         DateTime?           @db.DateTime
-  ShelterStatistics ShelterStatistics[]
+  shelterStatistics ShelterStatistics[]
 }
 
 model ShelterAdoptionStatistics {
@@ -177,7 +207,7 @@ model ShelterAdoptionStatistics {
   createdAt         DateTime            @default(now()) @db.DateTime
   updatedAt         DateTime            @updatedAt @db.DateTime
   deletedAt         DateTime?           @db.DateTime
-  ShelterStatistics ShelterStatistics[]
+  shelterStatistics ShelterStatistics[]
 }
 
 enum AnimalGender {

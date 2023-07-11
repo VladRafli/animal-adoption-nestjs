@@ -23,8 +23,8 @@ export class StatisticsService {
     if (role === 'shelter') {
       return await this.prismaService.shelterStatistics.findMany({
         include: {
-          ShelterAdoptionStatistics: true,
-          ShelterAnimalStatistics: true,
+          shelterAdoptionStatistics: true,
+          shelterAnimalStatistics: true,
         },
         take: 8,
         orderBy: {

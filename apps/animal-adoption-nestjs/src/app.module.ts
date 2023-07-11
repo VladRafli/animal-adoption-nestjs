@@ -14,6 +14,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { UsersModule } from './users/users.module';
 import { S3StorageModule } from './_provider/s3-storage/s3-storage.module';
 import { StatisticsModule } from './statistics/statistics.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { StatisticsModule } from './statistics/statistics.module';
     TransactionsModule,
     TokensModule,
     StatisticsModule,
+    ChatModule,
   ],
 })
 export class AppModule {}

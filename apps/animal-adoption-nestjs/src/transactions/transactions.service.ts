@@ -87,27 +87,6 @@ export class TransactionsService {
     }
 
     if (role === RolesEnum.SHELTER) {
-      const test = await this.prismaService.adoptionTransaction.findMany({
-        where: {
-          animal: {
-            userId,
-          },
-        },
-        include: {
-          animal: {
-            include: {
-              animalPhoto: true,
-              animalType: true,
-            },
-          },
-          user: true,
-        },
-        skip,
-        take,
-      });
-
-      const test1 = userId;
-
       return await this.prismaService.adoptionTransaction.findMany({
         where: {
           animal: {
