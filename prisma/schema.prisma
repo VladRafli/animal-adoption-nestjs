@@ -79,6 +79,7 @@ model Animal {
   animalType          AnimalType            @relation(fields: [animalTypeId], references: [id], onUpdate: Cascade, onDelete: NoAction)
   animalPhoto         AnimalPhoto[]
   adoptionTransaction AdoptionTransaction[]
+  animalCertificate   AnimalCertificate[]
 }
 
 model AnimalPhoto {
@@ -92,10 +93,22 @@ model AnimalPhoto {
   animal    Animal    @relation(fields: [animalId], references: [id], onUpdate: Cascade, onDelete: NoAction)
 }
 
+model AnimalCertificate {
+  id          String    @id @unique @db.Char(40)
+  animalId    String    @db.Char(40)
+  type        String    @db.VarChar(50)
+  description String    @db.VarChar(255)
+  path        String    @db.Text
+  createdAt   DateTime  @default(now()) @db.DateTime
+  updatedAt   DateTime  @updatedAt @db.DateTime
+  deletedAt   DateTime? @db.DateTime
+  animal      Animal    @relation(fields: [animalId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+}
+
 model ChatRoom {
   id        String    @id @unique @db.Char(40)
-  fromId      String    @db.Char(40)
-  toId        String    @db.Char(40)
+  fromId    String    @db.Char(40)
+  toId      String    @db.Char(40)
   createdAt DateTime  @default(now()) @db.DateTime
   updatedAt DateTime  @updatedAt @db.DateTime
   deletedAt DateTime? @db.DateTime
@@ -107,8 +120,8 @@ model ChatRoom {
 model Chat {
   id         String    @id @unique @db.Char(40)
   chatRoomId String    @db.Char(40)
-  senderId     String    @db.Char(40)
-  receiverId   String    @db.Char(40)
+  senderId   String    @db.Char(40)
+  receiverId String    @db.Char(40)
   message    String    @db.VarChar(255)
   createdAt  DateTime  @default(now()) @db.DateTime
   updatedAt  DateTime  @updatedAt @db.DateTime
@@ -178,14 +191,14 @@ model AdoptionStatistics {
 }
 
 model ShelterStatistics {
-  id                        Int                       @id @unique @default(autoincrement()) @db.Int
-  shelterAnimalStatisticsId Int                       @db.Int
+  id                          Int                       @id @unique @default(autoincrement()) @db.Int
+  shelterAnimalStatisticsId   Int                       @db.Int
   shelterAdoptionStatisticsId Int                       @db.Int
-  createdAt                 DateTime                  @default(now()) @db.DateTime
-  updatedAt                 DateTime                  @updatedAt @db.DateTime
-  deletedAt                 DateTime?                 @db.DateTime
-  shelterAnimalStatistics   ShelterAnimalStatistics   @relation(fields: [shelterAnimalStatisticsId], references: [id], onUpdate: Cascade, onDelete: NoAction)
-  shelterAdoptionStatistics ShelterAdoptionStatistics @relation(fields: [shelterAdoptionStatisticsId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  createdAt                   DateTime                  @default(now()) @db.DateTime
+  updatedAt                   DateTime                  @updatedAt @db.DateTime
+  deletedAt                   DateTime?                 @db.DateTime
+  shelterAnimalStatistics     ShelterAnimalStatistics   @relation(fields: [shelterAnimalStatisticsId], references: [id], onUpdate: Cascade, onDelete: NoAction)
+  shelterAdoptionStatistics   ShelterAdoptionStatistics @relation(fields: [shelterAdoptionStatisticsId], references: [id], onUpdate: Cascade, onDelete: NoAction)
 }
 
 model ShelterAnimalStatistics {

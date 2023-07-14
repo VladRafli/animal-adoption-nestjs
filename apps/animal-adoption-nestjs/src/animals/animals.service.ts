@@ -16,8 +16,10 @@ export class AnimalsService {
   ) {}
 
   async create(userId: string, createAnimalDto: CreateAnimalDto) {
-    const { type, animalPhoto, ...animalDto } = createAnimalDto;
-    const uploadedFiles = [];
+    const { type, animalPhoto, animalCertificate, ...animalDto } =
+      createAnimalDto;
+    const uploadedAnimalPhotos = [];
+    const uploadedAnimalCertificates = [];
     const animalId = uuid.v4();
 
     const animalType = await this.prismaService.animalType.findFirst({
@@ -29,7 +31,7 @@ export class AnimalsService {
 
     if (animalPhoto !== undefined) {
       for (const photo of animalPhoto) {
-        uploadedFiles.push(
+        uploadedAnimalPhotos.push(
           // await this.localStorageService.uploadFile(
           //   `${animalId}/${photo.type}/${photo.filename}`,
           //   Buffer.from(photo.buffer, 'base64'),
@@ -37,6 +39,21 @@ export class AnimalsService {
           await this.s3StorageService.uploadFile(
             `animal/${animalId}/${photo.type}/${photo.filename}`,
             Buffer.from(photo.buffer, 'base64'),
+          ),
+        );
+      }
+    }
+
+    if (animalCertificate !== undefined) {
+      for (const certificate of animalCertificate) {
+        uploadedAnimalCertificates.push(
+          // await this.localStorageService.uploadFile(
+          //   `${animalId}/${certificate.type}/${certificate.filename}`,
+          //   Buffer.from(certificate.buffer, 'base64'),
+          // ),
+          await this.s3StorageService.uploadFile(
+            `animal/${animalId}/${certificate.type}/${certificate.filename}`,
+            Buffer.from(certificate.buffer, 'base64'),
           ),
         );
       }
@@ -61,8 +78,21 @@ export class AnimalsService {
               animalPhoto !== undefined
                 ? animalPhoto.map((val, idx) => ({
                     id: uuid.v4(),
-                    path: uploadedFiles[idx].Location,
+                    path: uploadedAnimalPhotos[idx].Location,
                     type: val.type,
+                  }))
+                : [],
+          },
+        },
+        animalCertificate: {
+          createMany: {
+            data:
+              animalCertificate !== undefined
+                ? animalCertificate.map((val, idx) => ({
+                    id: uuid.v4(),
+                    path: uploadedAnimalCertificates[idx].Location,
+                    type: val.type,
+                    description: val.description,
                   }))
                 : [],
           },
@@ -72,6 +102,7 @@ export class AnimalsService {
       include: {
         animalPhoto: true,
         animalType: true,
+        animalCertificate: true,
         user: true,
       },
     });
@@ -91,6 +122,7 @@ export class AnimalsService {
       include: {
         animalPhoto: true,
         animalType: true,
+        animalCertificate: true,
       },
       skip,
       take,
@@ -113,6 +145,7 @@ export class AnimalsService {
       include: {
         animalPhoto: true,
         animalType: true,
+        animalCertificate: true,
       },
     });
 
@@ -122,8 +155,10 @@ export class AnimalsService {
   }
 
   async update(id: string, updateAnimalDto: UpdateAnimalDto) {
-    const { animalPhoto, type, ...animalDto } = updateAnimalDto;
+    const { animalPhoto, animalCertificate, type, ...animalDto } =
+      updateAnimalDto;
     const updatedAnimalPhoto = [];
+    const updatedAnimalCertificate = [];
 
     const animal = await this.prismaService.animal.findFirst({
       where: {
@@ -186,6 +221,62 @@ export class AnimalsService {
       }
     }
 
+    if (animalCertificate !== undefined) {
+      for (const certificate of animalCertificate) {
+        const oldCertificate =
+          await this.prismaService.animalCertificate.findFirst({
+            where: {
+              animalId: id,
+              type: certificate.type,
+              deletedAt: null, // If Soft deleted
+            },
+          });
+
+        if (oldCertificate) {
+          await this.localStorageService.deleteFile(oldCertificate.path);
+
+          const uploadedFile = await this.s3StorageService.uploadFile(
+            `animal/${id}/${certificate.type}/${certificate.filename}`,
+            Buffer.from(certificate.buffer, 'base64'),
+          );
+
+          updatedAnimalCertificate.push(
+            await this.prismaService.animalCertificate.update({
+              data: {
+                path: uploadedFile.Location,
+                type: certificate.type,
+                description: certificate.description,
+              },
+              where: {
+                id: oldCertificate.id,
+              },
+            }),
+          );
+        } else {
+          const uploadedFile = await this.s3StorageService.uploadFile(
+            `animal/${id}/${certificate.type}/${certificate.filename}`,
+            Buffer.from(certificate.buffer, 'base64'),
+          );
+
+          updatedAnimalCertificate.push(
+            await this.prismaService.animalCertificate.create({
+              data: {
+                id: uuid.v4(),
+                path: uploadedFile.Location,
+                type: certificate.type,
+                description: certificate.description,
+                animal: {
+                  connect: {
+                    id,
+                  },
+                },
+              },
+            }),
+          );
+        }
+      }
+    }
+
     const animalType = await this.prismaService.animalType.findFirst({
       where: {
         name: type,
@@ -211,12 +302,14 @@ export class AnimalsService {
       animal: {
         ...updatedAnimal,
         animalPhoto: updatedAnimalPhoto,
+        animalCertificate: updatedAnimalCertificate,
       },
     };
   }
 
   async remove(id: string) {
-    let deletedAnimalPhoto;
+    let deletedAnimalPhoto: any;
+    let deletedAnimalCertificate: any;
     const animal = await this.prismaService.animal.findFirst({
       where: {
         id,
@@ -228,15 +321,15 @@ export class AnimalsService {
       throw new BadRequestException('Animal not found');
     }
 
-    const oldPhoto = await this.prismaService.animalPhoto.findMany({
+    const oldAnimalPhoto = await this.prismaService.animalPhoto.findMany({
       where: {
         animalId: id,
         deletedAt: null, // If Soft deleted
       },
     });
 
-    if (oldPhoto) {
-      oldPhoto.forEach(async (val) => {
+    if (oldAnimalPhoto) {
+      oldAnimalPhoto.forEach(async (val) => {
         await this.localStorageService.deleteFile(val.path);
       });
 
@@ -247,6 +340,27 @@ export class AnimalsService {
       });
     }
 
+    const oldAnimalCertificate =
+      await this.prismaService.animalCertificate.findMany({
+        where: {
+          animalId: id,
+          deletedAt: null, // If Soft deleted
+        },
+      });
+
+    if (oldAnimalCertificate) {
+      oldAnimalCertificate.forEach(async (val) => {
+        await this.localStorageService.deleteFile(val.path);
+      });
+
+      deletedAnimalCertificate =
+        await this.prismaService.animalCertificate.deleteMany({
+          where: {
+            animalId: id,
+          },
+        });
+    }
+
     const deletedAnimal = await this.prismaService.animal.delete({
       where: {
         id,
@@ -255,7 +369,8 @@ export class AnimalsService {
 
     return {
       ...deletedAnimal,
-      deletedAnimalPhoto: deletedAnimalPhoto,
+      deletedAnimalPhoto,
+      deletedAnimalCertificate,
     };
 
     // Soft delete

@@ -9,6 +9,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { CreateAnimalCertificateDto } from './create-animalCertificate.dto';
 import { CreateAnimalPhotoDto } from './create-animalPhoto.dto';
 
 export class CreateAnimalDto {
@@ -46,4 +47,9 @@ export class CreateAnimalDto {
   @IsArray()
   @ApiProperty()
   animalPhoto?: CreateAnimalPhotoDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ApiProperty()
+  animalCertificate?: CreateAnimalCertificateDto[];
 }
