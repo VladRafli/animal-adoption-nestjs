@@ -184,13 +184,22 @@ export class ChatService {
       });
     }
 
+    if (chatRoomId !== undefined && chatRoomId !== '') {
+      return await this.prismaService.chat.create({
+        data: {
+          id: uuid.v4(),
+          chatRoomId,
+          message,
+          senderId: from,
+          receiverId: to,
+        },
+      });
+    }
+
     return await this.prismaService.chat.create({
       data: {
         id: uuid.v4(),
-        chatRoomId:
-          chatRoomId !== undefined || chatRoomId !== ''
-            ? chatRoomId
-            : chatRoom.id,
+        chatRoomId: chatRoom.id,
         message,
         senderId: from,
         receiverId: to,
