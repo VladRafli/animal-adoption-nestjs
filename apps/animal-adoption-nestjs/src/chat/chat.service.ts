@@ -27,7 +27,33 @@ export class ChatService {
         ],
       },
       include: {
+        from: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        to: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         chat: {
+          include: {
+            receiver: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            sender: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
           orderBy: {
             createdAt: 'desc',
           },
@@ -48,11 +74,37 @@ export class ChatService {
 
     const chatRoom = await this.prismaService.chatRoom.findMany({
       where: {
-        fromId: id,
-        toId: senderId,
+        fromId: senderId,
+        toId: id,
       },
       include: {
+        from: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        to: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         chat: {
+          include: {
+            receiver: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            sender: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
           orderBy: {
             createdAt: 'desc',
           },

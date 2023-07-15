@@ -96,6 +96,7 @@ export class TransactionsService {
         include: {
           animal: {
             include: {
+              user: true,
               animalPhoto: true,
               animalType: true,
             },
@@ -117,6 +118,7 @@ export class TransactionsService {
         include: {
           animal: {
             include: {
+              user: true,
               animalPhoto: true,
               animalType: true,
             },
