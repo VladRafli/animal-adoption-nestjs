@@ -44,12 +44,12 @@ export class ChatController {
   @Post()
   async createChat(@Req() req: any) {
     const id = req.user.sub;
-    const { message, to } = req.body;
+    const { message, to, chatRoomId } = req.body;
 
     return {
       statusCode: HttpStatus.CREATED,
       message: 'Successfully created chat',
-      data: await this.chatService.createChat(id, to, message),
+      data: await this.chatService.createChat(chatRoomId, id, to, message),
     };
   }
 

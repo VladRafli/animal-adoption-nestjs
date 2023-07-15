@@ -127,21 +127,36 @@ export class ChatService {
     return chatRoom;
   }
 
-  async createChat(from: string, to: string, message: string) {
-    let chatRoom = await this.prismaService.chatRoom.findFirst({
-      where: {
-        OR: [
-          {
-            fromId: from,
-            toId: to,
-          },
-          {
-            fromId: to,
-            toId: from,
-          },
-        ],
-      },
-    });
+  async createChat(
+    chatRoomId: string,
+    from: string,
+    to: string,
+    message: string,
+  ) {
+    let chatRoom;
+
+    if (chatRoomId === undefined || chatRoomId === '') {
+      chatRoom = await this.prismaService.chatRoom.findFirst({
+        where: {
+          OR: [
+            {
+              fromId: from,
+              toId: to,
+            },
+            {
+              fromId: to,
+              toId: from,
+            },
+          ],
+        },
+      });
+    } else {
+      chatRoom = await this.prismaService.chatRoom.findUnique({
+        where: {
+          id: chatRoomId,
+        },
+      });
+    }
 
     const sender = await this.prismaService.user.findUnique({
       where: {
@@ -172,7 +187,10 @@ export class ChatService {
     return await this.prismaService.chat.create({
       data: {
         id: uuid.v4(),
-        chatRoomId: chatRoom.id,
+        chatRoomId:
+          chatRoomId !== undefined || chatRoomId !== ''
+            ? chatRoomId
+            : chatRoom.id,
         message,
         senderId: from,
         receiverId: to,
