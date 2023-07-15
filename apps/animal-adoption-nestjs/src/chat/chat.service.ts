@@ -72,10 +72,18 @@ export class ChatService {
       throw new BadRequestException('User not found');
     }
 
-    const chatRoom = await this.prismaService.chatRoom.findMany({
+    const chatRoom = await this.prismaService.chatRoom.findFirst({
       where: {
-        fromId: senderId,
-        toId: id,
+        OR: [
+          {
+            fromId: id,
+            toId: senderId,
+          },
+          {
+            fromId: senderId,
+            toId: id,
+          },
+        ],
       },
       include: {
         from: {
@@ -112,7 +120,7 @@ export class ChatService {
       },
     });
 
-    if (chatRoom.length < 1) {
+    if (chatRoom === null) {
       throw new BadRequestException('ChatRoom not found');
     }
 
@@ -122,8 +130,16 @@ export class ChatService {
   async createChat(from: string, to: string, message: string) {
     let chatRoom = await this.prismaService.chatRoom.findFirst({
       where: {
-        fromId: from,
-        toId: to,
+        OR: [
+          {
+            fromId: from,
+            toId: to,
+          },
+          {
+            fromId: to,
+            toId: from,
+          },
+        ],
       },
     });
 
