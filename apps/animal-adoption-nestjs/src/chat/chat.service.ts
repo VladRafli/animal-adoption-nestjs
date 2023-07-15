@@ -72,18 +72,10 @@ export class ChatService {
       throw new BadRequestException('User not found');
     }
 
-    const chatRoom = await this.prismaService.chatRoom.findFirst({
+    const chatRoom = await this.prismaService.chatRoom.findMany({
       where: {
-        OR: [
-          {
-            fromId: id,
-            toId: senderId,
-          },
-          {
-            fromId: senderId,
-            toId: id,
-          },
-        ],
+        fromId: id,
+        toId: senderId,
       },
       include: {
         from: {
@@ -120,43 +112,20 @@ export class ChatService {
       },
     });
 
-    if (chatRoom === null) {
+    if (chatRoom.length < 1) {
       throw new BadRequestException('ChatRoom not found');
     }
 
     return chatRoom;
   }
 
-  async createChat(
-    chatRoomId: string,
-    from: string,
-    to: string,
-    message: string,
-  ) {
-    let chatRoom;
-
-    if (chatRoomId === undefined || chatRoomId === '') {
-      chatRoom = await this.prismaService.chatRoom.findFirst({
-        where: {
-          OR: [
-            {
-              fromId: from,
-              toId: to,
-            },
-            {
-              fromId: to,
-              toId: from,
-            },
-          ],
-        },
-      });
-    } else {
-      chatRoom = await this.prismaService.chatRoom.findUnique({
-        where: {
-          id: chatRoomId,
-        },
-      });
-    }
+  async createChat(from: string, to: string, message: string) {
+    let chatRoom = await this.prismaService.chatRoom.findFirst({
+      where: {
+        fromId: from,
+        toId: to,
+      },
+    });
 
     const sender = await this.prismaService.user.findUnique({
       where: {
@@ -180,18 +149,6 @@ export class ChatService {
           id: uuid.v4(),
           fromId: from,
           toId: to,
-        },
-      });
-    }
-
-    if (chatRoomId !== undefined && chatRoomId !== '') {
-      return await this.prismaService.chat.create({
-        data: {
-          id: uuid.v4(),
-          chatRoomId,
-          message,
-          senderId: from,
-          receiverId: to,
         },
       });
     }
